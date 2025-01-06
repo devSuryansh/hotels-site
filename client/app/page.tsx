@@ -1,7 +1,10 @@
 import React from "react";
-import { Header, Hero, FeaturedHotels, Footer } from "@/components";
+import Header from "../components/header";
+import Hero from "../components/hero";
+import FeaturedHotels from "../components/featured-hotels";
+import Footer from "../components/footer";
 
-const App = () => {
+const page = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -14,4 +17,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default page;
