@@ -1,42 +1,15 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StarIcon } from "lucide-react";
+import { hotels } from "@/data/hotels";
 
-const hotels = [
-  {
-    id: 1,
-    name: "Hotel 1",
-    location: "Location 1",
-    rating: 4.9,
-    price: 2990,
-    image: "/file.svg?height=100&width=300",
-  },
-  {
-    id: 2,
-    name: "Hotel 2",
-    location: "Location 2",
-    rating: 4.5,
-    price: 1990,
-    image: "/file.svg?height=100&width=300",
-  },
-  {
-    id: 3,
-    name: "Hotel 3",
-    location: "Location 3",
-    rating: 4.7,
-    price: 2490,
-    image: "/file.svg?height=100&width=300",
-  },
-  {
-    id: 4,
-    name: "Hotel 4",
-    location: "Location 4",
-    rating: 4.8,
-    price: 3990,
-    image: "/file.svg?height=100&width=300",
-  },
-];
+// const hotels = [
+//   { id: 1, name: "Luxury Resort & Spa", location: "Maldives", rating: 4.9, price: 299, image: "/placeholder.svg?height=200&width=300" },
+//   { id: 2, name: "City Center Hotel", location: "New York", rating: 4.5, price: 199, image: "/placeholder.svg?height=200&width=300" },
+//   { id: 3, name: "Mountain View Lodge", location: "Switzerland", rating: 4.7, price: 249, image: "/placeholder.svg?height=200&width=300" },
+// ]
 
 export default function FeaturedHotels() {
   return (
@@ -68,7 +41,9 @@ export default function FeaturedHotels() {
                 </p>
               </CardContent>
               <CardFooter className="p-4 pt-0">
-                <Button className="w-full">Book Now</Button>
+                <Button asChild className="w-full">
+                  <Link href={`/hotel/${hotel.id}`}>Book Now</Link>
+                </Button>
               </CardFooter>
             </Card>
           ))}
