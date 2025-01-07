@@ -4,7 +4,7 @@ import Hero from "../components/hero";
 import FeaturedHotels from "../components/featured-hotels";
 import Footer from "../components/footer";
 
-const page = () => {
+const Home = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -17,4 +17,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Home;
