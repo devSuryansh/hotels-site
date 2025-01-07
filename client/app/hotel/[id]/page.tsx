@@ -3,19 +3,19 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
+  Button,
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from "@/components/ui/card";
+  Input,
+  Label,
+  Textarea,
+} from "@/components/ui";
 import { StarIcon } from "lucide-react";
-import { ImageGalleryModal } from "@/components/image-gallery-modal";
+import { ImageGalleryModal } from "@/components";
 import { hotels } from "@/data/hotels";
 
 export default function HotelDetails() {

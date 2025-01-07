@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger, Button } from "@/components/ui";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 

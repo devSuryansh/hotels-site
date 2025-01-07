@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, Button } from "@/components/ui";
 import { StarIcon } from "lucide-react";
 import { hotels } from "@/data/hotels";
 

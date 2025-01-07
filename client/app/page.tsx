@@ -1,8 +1,5 @@
 import React from "react";
-import Header from "../components/header";
-import Hero from "../components/hero";
-import FeaturedHotels from "../components/featured-hotels";
-import Footer from "../components/footer";
+import { Header, Hero, FeaturedHotels, Footer } from "@/components";
 
 const Home = () => {
   return (
