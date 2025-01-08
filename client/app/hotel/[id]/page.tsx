@@ -15,7 +15,7 @@ import {
   Textarea,
 } from "@/components/ui";
 import { StarIcon } from "lucide-react";
-import { ImageGalleryModal } from "@/components";
+import { ImageGalleryModal } from "@/components/image-gallery-modal";
 import { hotels } from "@/data/hotels";
 
 export default function HotelDetails() {
