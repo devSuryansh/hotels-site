@@ -1,16 +1,17 @@
-import express from "express";
-import { config } from "dotenv";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import fileUpload from "express-fileupload";
-import dbConnection from "./database/dbConnection.js";
-import appointmentRouter from "./routers/appointmentRouter.js";
-import { errorMiddleware } from "./middlewares/errorMiddleware.js";
-import userRouter from "./routers/userRouter.js";
+import express from "express"; // Importing express framework
+import { config } from "dotenv"; // Importing dotenv for environment variable management
+import cors from "cors"; // Importing CORS for handling cross-origin requests
+import cookieParser from "cookie-parser"; // Importing cookie-parser to parse cookies
+import fileUpload from "express-fileupload"; // Importing express-fileupload for handling file uploads
+import dbConnection from "./database/dbConnection.js"; // Importing database connection function
+import appointmentRouter from "./routers/appointmentRouter.js"; // Importing appointment router
+import { errorMiddleware } from "./middlewares/errorMiddleware.js"; // Importing error handling middleware
+import userRouter from "./routers/userRouter.js"; // Importing user router
 
-const app = express();
-config({ path: ".env" });
+const app = express(); // Creating an instance of express
+config({ path: ".env" }); // Configuring environment variables
 
+// Setting up CORS to allow requests from specific origins
 app.use(
   cors({
     origin: ["http://localhost:3000", "http://localhost:3001"],
@@ -19,10 +20,11 @@ app.use(
   })
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(express.json()); // Middleware to parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
+app.use(cookieParser()); // Middleware to parse cookies
 
+// Middleware to handle file uploads with temporary file storage
 app.use(
   fileUpload({
     useTempFiles: true,
@@ -30,10 +32,12 @@ app.use(
   })
 );
 
+// Setting up routers for different API endpoints
 app.use("/api/v1/appointment", appointmentRouter);
 app.use("/api/v1/user", userRouter);
-dbConnection();
 
-app.use(errorMiddleware);
+dbConnection(); // Establishing database connection
 
-export default app;
+app.use(errorMiddleware); // Using custom error handling middleware
+
+export default app; // Exporting the app instance
