@@ -22,8 +22,8 @@ import Footer from "@/components/footer";
 
 export default function HotelDetails() {
   const params = useParams();
-  const hotelId = Number(params.id);
-  const hotel = hotels.find((h) => h.id === hotelId);
+  const hotelSlug = params.id; // assuming 'id' is now the slug
+  const hotel = hotels.find((h) => h.slug === hotelSlug);
 
   const [formData, setFormData] = useState({
     name: "",

@@ -2,6 +2,7 @@ export const hotels = [
   {
     id: 1,
     name: "Hotel 1",
+    slug: "hotel-1",
     location: "Location A",
     rating: 4.9,
     price: 2990,
@@ -21,6 +22,7 @@ export const hotels = [
   {
     id: 2,
     name: "Hotel 2",
+    slug: "hotel-2",
     location: "Location B",
     rating: 4.5,
     price: 1990,
@@ -38,6 +40,7 @@ export const hotels = [
   {
     id: 3,
     name: "Hotel 3",
+    slug: "hotel-3",
     location: "Location C",
     rating: 4.7,
     price: 2490,

@@ -41,7 +41,7 @@ export default function FeaturedHotels() {
               </CardContent>
               <CardFooter className="p-4 pt-0">
                 <Button asChild className="w-full">
-                  <Link href={`/hotel/${hotel.id}`}>Book Now</Link>
+                  <Link href={`/${hotel.slug}`}>Book Now</Link>
                 </Button>
               </CardFooter>
             </Card>
