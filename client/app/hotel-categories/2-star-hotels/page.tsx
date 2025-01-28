@@ -15,7 +15,7 @@ export default function TwoStarHotelsPage() {
             {twoStarHotels.map((hotel) => (
               <li key={hotel.id}>
                 <Link
-                  href={`/hotel/${hotel.id}`}
+                  href={`/${hotel.slug}`}
                   className="text-blue-600 hover:text-blue-800 transition-colors"
                 >
                   {hotel.name}
