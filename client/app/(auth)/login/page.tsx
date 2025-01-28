@@ -12,9 +12,9 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
+  // CardFooter,
 } from "@/components/ui";
-import Link from "next/link";
+// import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -37,7 +37,7 @@ export default function LoginPage() {
         router.push("/");
       }
     } catch (error) {
-      setError("An error occurred. Please try again.");
+      setError(`An error occurred: ${error.message}. Please try again.`);
     }
   };
 
