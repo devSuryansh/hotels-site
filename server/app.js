@@ -7,6 +7,7 @@ import dbConnection from "./database/dbConnection.js"; // Importing database con
 import appointmentRouter from "./routers/appointmentRouter.js"; // Importing appointment router
 import { errorMiddleware } from "./middlewares/errorMiddleware.js"; // Importing error handling middleware
 import userRouter from "./routers/userRouter.js"; // Importing user router
+import hotelsRouter from "./routers/hotelsRouter.js"; // Importing hotels router
 
 const app = express(); // Creating an instance of express
 config({ path: ".env" }); // Configuring environment variables
@@ -35,6 +36,7 @@ app.use(
 // Setting up routers for different API endpoints
 app.use("/api/v1/appointment", appointmentRouter);
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/hotel", hotelsRouter);
 
 dbConnection(); // Establishing database connection
 
