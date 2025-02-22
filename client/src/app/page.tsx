@@ -1,7 +1,13 @@
-import React from "react";
+import HeroSection from "@/components/HeroSection";
+import FeaturedHotels from "@/components/FeaturedHotels";
+import Footer from "@/components/Footer";
 
-const page = () => {
-  return <div>page</div>;
-};
-
-export default page;
+export default function Home() {
+  return (
+    <main className="min-h-screen">
+      <HeroSection />
+      <FeaturedHotels />
+      <Footer />
+    </main>
+  );
+}
