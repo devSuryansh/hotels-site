@@ -3,10 +3,13 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const HOTELS = [
   {
     id: 1,
+    slug: "the-ritz-carlton",
     name: "Grand Hyatt",
     location: "Singapore",
     rating: 4.8,
@@ -16,6 +19,7 @@ const HOTELS = [
   },
   {
     id: 2,
+    slug: "burj-al-arab",
     name: "The Peninsula",
     location: "Hong Kong",
     rating: 4.9,
@@ -25,6 +29,7 @@ const HOTELS = [
   },
   {
     id: 3,
+    slug: "mandarin-oriental",
     name: "Mandarin Oriental",
     location: "Bangkok",
     rating: 4.7,
@@ -34,6 +39,7 @@ const HOTELS = [
   },
   {
     id: 4,
+    slug: "waldorf-astoria",
     name: "Waldorf Astoria",
     location: "New York",
     rating: 4.8,
@@ -43,6 +49,7 @@ const HOTELS = [
   },
   {
     id: 5,
+    slug: "park-hyatt",
     name: "Park Hyatt",
     location: "Sydney",
     rating: 4.7,
@@ -53,6 +60,8 @@ const HOTELS = [
 ];
 
 export default function FeaturedHotels() {
+  const router = useRouter();
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -61,10 +70,12 @@ export default function FeaturedHotels() {
           {HOTELS.map((hotel) => (
             <Card key={hotel.id} className="overflow-hidden">
               <div className="aspect-video relative overflow-hidden">
-                <img
+                <Image
                   src={hotel.image}
                   alt={hotel.name}
-                  className="absolute inset-0 w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                  layout="fill"
+                  objectFit="cover"
+                  className="hover:scale-110 transition-transform duration-300"
                 />
               </div>
               <CardContent className="p-6">
@@ -87,7 +98,12 @@ export default function FeaturedHotels() {
                 </p>
               </CardContent>
               <CardFooter className="p-6 pt-0">
-                <Button className="w-full">Book Now</Button>
+                <Button
+                  className="w-full"
+                  onClick={() => router.push(`/${hotel.slug}`)}
+                >
+                  View Details
+                </Button>
               </CardFooter>
             </Card>
           ))}

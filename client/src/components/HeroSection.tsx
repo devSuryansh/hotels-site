@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const FEATURED_HOTELS = [
   {
     id: 1,
+    slug: "the-ritz-carlton",
     name: "The Ritz-Carlton",
     location: "Paris, France",
     image:
@@ -14,6 +16,7 @@ const FEATURED_HOTELS = [
   },
   {
     id: 2,
+    slug: "burj-al-arab",
     name: "Burj Al Arab",
     location: "Dubai, UAE",
     image:
@@ -21,6 +24,7 @@ const FEATURED_HOTELS = [
   },
   {
     id: 3,
+    slug: "four-seasons",
     name: "Four Seasons",
     location: "Bora Bora",
     image:
@@ -28,6 +32,7 @@ const FEATURED_HOTELS = [
   },
   {
     id: 4,
+    slug: "aman-tokyo",
     name: "Aman Tokyo",
     location: "Tokyo, Japan",
     image:
@@ -35,6 +40,7 @@ const FEATURED_HOTELS = [
   },
   {
     id: 5,
+    slug: "bellagio",
     name: "Bellagio",
     location: "Las Vegas, USA",
     image:
@@ -44,6 +50,7 @@ const FEATURED_HOTELS = [
 
 export default function HeroSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const router = useRouter();
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % FEATURED_HOTELS.length);
@@ -73,8 +80,12 @@ export default function HeroSection() {
         <p className="text-xl md:text-2xl text-white/90 mb-8">
           {currentHotel.location}
         </p>
-        <Button className="w-fit" size="lg">
-          Book Now
+        <Button
+          className="w-fit"
+          size="lg"
+          onClick={() => router.push(`/${currentHotel.slug}`)}
+        >
+          View Details
         </Button>
       </div>
 
