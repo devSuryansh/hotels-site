@@ -31,7 +31,6 @@ export default function Navbar() {
           <Link href="/deals" className="text-sm font-medium">
             Deals
           </Link>
-          <Button>Sign In</Button>
         </div>
 
         <Button variant="ghost" size="icon" className="md:hidden">
