@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-import type { Mongoose } from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI || "your-mongodb-uri-here";
 
@@ -9,17 +8,13 @@ if (!MONGODB_URI) {
   );
 }
 
-/**
- * Global is used here to maintain a cached connection across hot reloads
- * in development. This prevents connections growing exponentially
- * during API Route usage.
- */
-let cached: { conn: Mongoose | null; promise: Promise<Mongoose> | null } =
-  global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+// Extend global object to avoid TypeScript errors
+declare global {
+  var mongoose: { conn: Mongoose | null; promise: Promise<Mongoose> | null };
 }
+
+// Use global cache for hot reload prevention
+let cached = global.mongoose || { conn: null, promise: null };
 
 async function dbConnect() {
   if (cached.conn) {
@@ -31,13 +26,12 @@ async function dbConnect() {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose
-      .connect(MONGODB_URI, opts)
-      .then((mongoose: Mongoose) => {
-        return mongoose;
-      });
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      return mongoose;
+    });
   }
   cached.conn = await cached.promise;
+  global.mongoose = cached; // Store in global cache
   return cached.conn;
 }
 
