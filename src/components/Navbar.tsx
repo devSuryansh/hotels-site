@@ -10,7 +10,7 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold text-primary">
-          LuxStay
+          Amit Hotels
         </Link>
 
         <div className="hidden md:flex items-center space-x-6">
