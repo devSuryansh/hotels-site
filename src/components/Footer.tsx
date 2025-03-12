@@ -8,7 +8,7 @@ export default function Footer() {
           <div>
             <h3 className="text-xl font-bold text-white mb-4">LuxStay</h3>
             <p className="text-sm">
-              Discover the world's most luxurious hotels and resorts. Book your
+              Discover the India&apos;s best hotels and resorts. Book your
               perfect stay with us.
             </p>
           </div>
@@ -89,7 +89,9 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8 text-sm text-center">
-          <p>&copy; {new Date().getFullYear()} LuxStay. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} Amit Hotels. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

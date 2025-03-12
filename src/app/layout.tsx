@@ -8,8 +8,8 @@ import { ReactNode } from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "LuxStay - Luxury Hotel Bookings",
-  description: "Book your perfect luxury hotel stay with LuxStay",
+  title: "Amit Hotels - Hotel Bookings",
+  description: "Book your perfect hotel stay with Amit Hotels",
 };
 
 const RootLayout = ({ children }: { children: ReactNode }) => {
