@@ -1,57 +1,68 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-interface Hotel {
-  _id: string;
-  slug: string;
-  name: string;
-  location: string;
-  image: string;
-}
+const FEATURED_HOTELS = [
+  {
+    id: 1,
+    slug: "the-ritz-carlton",
+    name: "The Ritz-Carlton",
+    location: "Paris, France",
+    image:
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80",
+  },
+  {
+    id: 2,
+    slug: "burj-al-arab",
+    name: "Burj Al Arab",
+    location: "Dubai, UAE",
+    image:
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80",
+  },
+  {
+    id: 3,
+    slug: "four-seasons",
+    name: "Four Seasons",
+    location: "Bora Bora",
+    image:
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80",
+  },
+  {
+    id: 4,
+    slug: "aman-tokyo",
+    name: "Aman Tokyo",
+    location: "Tokyo, Japan",
+    image:
+      "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&q=80",
+  },
+  {
+    id: 5,
+    slug: "bellagio",
+    name: "Bellagio",
+    location: "Las Vegas, USA",
+    image:
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80",
+  },
+];
 
 export default function HeroSection() {
-  const [hotels, setHotels] = useState<Hotel[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchHotels = async () => {
-      try {
-        const res = await fetch("/api/Hotels");
-        if (!res.ok) throw new Error("Failed to fetch hotels");
-        const data = await res.json();
-        setHotels(data);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchHotels();
-  }, []);
-
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % hotels.length);
+    setCurrentIndex((prev) => (prev + 1) % FEATURED_HOTELS.length);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev === 0 ? hotels.length - 1 : prev - 1));
+    setCurrentIndex((prev) =>
+      prev === 0 ? FEATURED_HOTELS.length - 1 : prev - 1
+    );
   };
 
-  if (loading)
-    return <p className="text-center py-10">Loading featured hotels...</p>;
-  if (error) return <p className="text-center text-red-500 py-10">{error}</p>;
-  if (hotels.length === 0)
-    return <p className="text-center py-10">No hotels available.</p>;
-
-  const currentHotel = hotels[currentIndex];
+  const currentHotel = FEATURED_HOTELS[currentIndex];
 
   return (
     <div className="relative h-[80vh] mt-16">
