@@ -2,7 +2,6 @@
 
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -70,9 +69,6 @@ const HOTELS_DATA = {
 
 export default function HotelPage() {
   const { slug } = useParams();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    new Date()
-  );
   const [guests, setGuests] = useState(2);
 
   const hotel = HOTELS_DATA[slug as keyof typeof HOTELS_DATA];
@@ -175,12 +171,6 @@ export default function HotelPage() {
                   <label className="block text-sm font-medium mb-2">
                     Check-in Date
                   </label>
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    className="rounded-md border"
-                  />
                 </div>
 
                 <div>
