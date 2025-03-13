@@ -15,7 +15,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
-    "lightningcss-win32-x64-msvc": "^1.29.2",
     "lucide-react": "^0.475.0",
     "mongoose": "^8.12.1",
     "next": "15.1.7",
