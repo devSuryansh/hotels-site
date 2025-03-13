@@ -27,6 +27,7 @@ export default function HeroSection() {
         if (!res.ok) throw new Error("Failed to fetch hotels");
         const data = await res.json();
         setHotels(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(err.message);
       } finally {
