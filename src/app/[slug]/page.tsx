@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/app/[slug]/page.tsx
 "use client";
 
 import { useParams } from "next/navigation";
@@ -15,71 +18,76 @@ import {
   Tv,
   Mail,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-// This would typically come from a database
-const HOTELS_DATA = {
-  "the-ritz-carlton": {
-    name: "The Ritz-Carlton",
-    location: "Paris, France",
-    rating: 4.9,
-    price: 1200,
-    description:
-      "Experience unparalleled luxury in the heart of Paris. The Ritz-Carlton offers spectacular views of the city, world-class dining, and impeccable service.",
-    images: [
-      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80",
-    ],
-    amenities: [
-      "Free WiFi",
-      "Valet Parking",
-      "24/7 Room Service",
-      "Spa",
-      "Fitness Center",
-      "Swimming Pool",
-    ],
-    phone: "+33 1 43 16 30 30",
-    email: "reservations@ritz-paris.com",
-  },
-  "burj-al-arab": {
-    name: "Burj Al Arab",
-    location: "Dubai, UAE",
-    rating: 5.0,
-    price: 2400,
-    description:
-      "The world's most luxurious hotel, Burj Al Arab is a symbol of modern Dubai. Experience the ultimate in Arabian hospitality and luxury.",
-    images: [
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80",
-    ],
-    amenities: [
-      "Private Beach",
-      "Helipad",
-      "Butler Service",
-      "Underwater Restaurant",
-      "Gold-Plated iPads",
-      "Chauffeur Service",
-    ],
-    phone: "+971 4 301 7777",
-    email: "reservations@burjalarab.com",
-  },
-};
+const bookingSchema = z.object({
+  checkIn: z.string().min(1, "Check-in date is required"),
+  guests: z.number().min(1).max(4),
+  email: z.string().email("Invalid email address"),
+});
 
 export default function HotelPage() {
   const { slug } = useParams();
+  const [hotel, setHotel] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [guests, setGuests] = useState(2);
 
-  const hotel = HOTELS_DATA[slug as keyof typeof HOTELS_DATA];
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: { guests: 2 },
+  });
 
-  if (!hotel) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <h1 className="text-2xl font-bold">Hotel not found</h1>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const fetchHotel = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/hotels?slug=${slug}`);
+        if (!res.ok) throw new Error("Hotel not found");
+        const data = await res.json();
+        setHotel(data[0]);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHotel();
+  }, [slug]);
+
+  const onSubmit = async (data: any) => {
+    try {
+      const bookingData = {
+        hotel: hotel._id,
+        userEmail: data.email,
+        checkIn: new Date(data.checkIn),
+        guests: data.guests,
+      };
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingData),
+      });
+      if (!res.ok) throw new Error("Booking failed");
+      // Add success toast here
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  if (loading)
+    return <div className="container mx-auto px-4 py-16">Loading...</div>;
+  if (error) return <div className="container mx-auto px-4 py-16">{error}</div>;
+  if (!hotel)
+    return <div className="container mx-auto px-4 py-16">Hotel not found</div>;
 
   return (
     <div className="container mx-auto px-4 py-16">
@@ -161,16 +169,20 @@ export default function HotelPage() {
         <div className="lg:col-span-1">
           <Card>
             <CardContent className="p-6">
-              <div className="mb-6">
-                <p className="text-3xl font-bold mb-2">${hotel.price}</p>
-                <p className="text-muted-foreground">per night</p>
-              </div>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div className="mb-6">
+                  <p className="text-3xl font-bold mb-2">${hotel.price}</p>
+                  <p className="text-muted-foreground">per night</p>
+                </div>
 
-              <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Check-in Date
                   </label>
+                  <Input type="date" {...register("checkIn")} />
+                  {errors.checkIn && (
+                    <p className="text-red-500">{errors.checkIn.message}</p>
+                  )}
                 </div>
 
                 <div>
@@ -179,15 +191,30 @@ export default function HotelPage() {
                   </label>
                   <Input
                     type="number"
-                    value={guests}
+                    {...register("guests", { valueAsNumber: true })}
                     onChange={(e) => setGuests(parseInt(e.target.value))}
                     min={1}
                     max={4}
                   />
+                  {errors.guests && (
+                    <p className="text-red-500">{errors.guests.message}</p>
+                  )}
                 </div>
 
-                <Button className="w-full">Book Now</Button>
-              </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Your Email
+                  </label>
+                  <Input type="email" {...register("email")} />
+                  {errors.email && (
+                    <p className="text-red-500">{errors.email.message}</p>
+                  )}
+                </div>
+
+                <Button type="submit" className="w-full">
+                  Book Now
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>
