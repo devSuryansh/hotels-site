@@ -6,8 +6,8 @@ import bcrypt from "bcrypt";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 
-// Define the auth options
-export const authOptions = {
+// Define auth options (no export)
+const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -60,6 +60,6 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-// Export the handler directly for GET and POST
+// Create and export the handler
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
