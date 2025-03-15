@@ -7,7 +7,7 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 
 // Define the auth options
-const authOptions = {
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",

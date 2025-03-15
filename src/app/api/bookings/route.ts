@@ -1,3 +1,4 @@
+// Add at the top
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
@@ -6,9 +7,17 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(request: Request) {
   await dbConnect();
-  const data = await request.json();
-  const booking = await Booking.create(data);
-  return NextResponse.json(booking, { status: 201 });
+  try {
+    const data = await request.json();
+    const booking = await Booking.create(data);
+    return NextResponse.json(booking, { status: 201 });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to create booking" },
+      { status: 400 }
+    );
+  }
 }
 
 export async function GET() {

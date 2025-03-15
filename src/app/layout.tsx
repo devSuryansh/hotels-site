@@ -1,3 +1,4 @@
+// src/app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -5,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ReactNode } from "react";
 import { ToastProvider } from "@/components/ui/toast";
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider } from "next-auth/react"; // Explicit import
 
 const inter = Inter({ subsets: ["latin"] });
 

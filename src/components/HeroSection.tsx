@@ -1,3 +1,4 @@
+// src/components/HeroSection.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -5,8 +6,16 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+interface Hotel {
+  _id: string;
+  name: string;
+  slug: string;
+  location: string;
+  images: { url: string }[];
+}
+
 export default function HeroSection() {
-  const [hotels, setHotels] = useState([]);
+  const [hotels, setHotels] = useState<Hotel[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +26,7 @@ export default function HeroSection() {
       try {
         const res = await fetch("/api/hotels");
         if (!res.ok) throw new Error("Failed to fetch hotels");
-        const data = await res.json();
+        const data: Hotel[] = await res.json();
         setHotels(data.slice(0, 5)); // Limit to 5 featured hotels
       } catch (err) {
         setError((err as Error).message);
