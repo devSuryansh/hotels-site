@@ -1,14 +1,16 @@
 // src/app/api/bookings/[id]/route.ts
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+// Define the params type explicitly
+interface Params {
+  id: string;
+}
+
+export async function PUT(request: NextRequest, context: { params: Params }) {
   await dbConnect();
   const session = await getServerSession(authOptions);
 
@@ -17,9 +19,8 @@ export async function PUT(
   }
 
   const data = await request.json();
-  const booking = await Booking.findByIdAndUpdate(params.id, data, {
-    new: true,
-  });
+  const { id } = context.params; // Access id from context.params
+  const booking = await Booking.findByIdAndUpdate(id, data, { new: true });
 
   if (!booking) {
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
