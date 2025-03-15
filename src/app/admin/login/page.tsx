@@ -2,35 +2,46 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import { Hotel, Mail, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      const response = await fetch("/api/auth/signin/credentials", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
       });
 
-      if (!response.ok) {
-        throw new Error("Login failed");
+      if (result?.error) {
+        throw new Error(result.error);
       }
 
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      // Redirect to admin dashboard on success
-      window.location.href = "/admin/dashboard";
+      toast({
+        title: "Success",
+        description: "Logged in successfully",
+      });
+      router.push("/admin/dashboard");
     } catch (error) {
-      console.error("Login error:", error);
-      // Here you could set an error state to show to the user
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Login failed",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,6 +72,7 @@ const Login = () => {
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter your email"
                 required
+                disabled={loading}
               />
             </div>
           </div>
@@ -80,6 +92,7 @@ const Login = () => {
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter your password"
                 required
+                disabled={loading}
               />
             </div>
           </div>
@@ -89,6 +102,7 @@ const Login = () => {
               <input
                 type="checkbox"
                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                disabled={loading}
               />
               <label className="ml-2 block text-sm text-gray-700">
                 Remember me
@@ -106,9 +120,10 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            disabled={loading}
           >
-            Sign in
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 

@@ -1,28 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/app/[slug]/page.tsx
 "use client";
 
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  MapPin,
-  Star,
-  Users,
-  Phone,
-  Wifi,
-  Car,
-  Coffee,
-  Tv,
-  Mail,
-} from "lucide-react";
+import { MapPin, Star, Users, Wifi, Car, Coffee, Tv } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useToast } from "@/hooks/use-toast";
 
 const bookingSchema = z.object({
   checkIn: z.string().min(1, "Check-in date is required"),
@@ -35,7 +24,9 @@ export default function HotelPage() {
   const [hotel, setHotel] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [guests, setGuests] = useState(2);
+  const { toast } = useToast();
 
   const {
     register,
@@ -77,9 +68,16 @@ export default function HotelPage() {
         body: JSON.stringify(bookingData),
       });
       if (!res.ok) throw new Error("Booking failed");
-      // Add success toast here
+      toast({
+        title: "Success",
+        description: "Booking created successfully",
+      });
     } catch (err) {
-      setError((err as Error).message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: (err as Error).message,
+      });
     }
   };
 
@@ -91,7 +89,6 @@ export default function HotelPage() {
 
   return (
     <div className="container mx-auto px-4 py-16">
-      {/* Hotel Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">{hotel.name}</h1>
         <div className="flex items-center gap-4 text-muted-foreground">
@@ -106,15 +103,14 @@ export default function HotelPage() {
         </div>
       </div>
 
-      {/* Image Gallery */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {hotel.images.map((image, index) => (
+        {hotel.images.map((image: { url: string }, index: number) => (
           <div
             key={index}
             className="aspect-video relative overflow-hidden rounded-lg"
           >
             <Image
-              src={image}
+              src={image.url}
               alt={`${hotel.name} - Image ${index + 1}`}
               layout="fill"
               objectFit="cover"
@@ -124,48 +120,29 @@ export default function HotelPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Hotel Information */}
         <div className="lg:col-span-2">
           <div className="prose max-w-none mb-8">
             <h2 className="text-2xl font-semibold mb-4">About this hotel</h2>
             <p className="text-muted-foreground">{hotel.description}</p>
           </div>
 
-          {/* Amenities */}
           <div className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Amenities</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {hotel.amenities.map((amenity, index) => (
+              {hotel.amenities.map((amenity: string, index: number) => (
                 <div key={index} className="flex items-center gap-2">
-                  {index % 6 === 0 && <Wifi className="h-4 w-4" />}
-                  {index % 6 === 1 && <Car className="h-4 w-4" />}
-                  {index % 6 === 2 && <Coffee className="h-4 w-4" />}
-                  {index % 6 === 3 && <Users className="h-4 w-4" />}
-                  {index % 6 === 4 && <Tv className="h-4 w-4" />}
-                  {index % 6 === 5 && <Phone className="h-4 w-4" />}
+                  {index % 5 === 0 && <Wifi className="h-4 w-4" />}
+                  {index % 5 === 1 && <Car className="h-4 w-4" />}
+                  {index % 5 === 2 && <Coffee className="h-4 w-4" />}
+                  {index % 5 === 3 && <Users className="h-4 w-4" />}
+                  {index % 5 === 4 && <Tv className="h-4 w-4" />}
                   <span>{amenity}</span>
                 </div>
               ))}
             </div>
           </div>
-
-          {/* Contact Information */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Contact Information</h2>
-            <div className="space-y-2">
-              <p className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                {hotel.phone}
-              </p>
-              <p className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                {hotel.email}
-              </p>
-            </div>
-          </div>
         </div>
 
-        {/* Booking Card */}
         <div className="lg:col-span-1">
           <Card>
             <CardContent className="p-6">

@@ -1,7 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/app/admin/dashboard/page.tsx
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -11,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { imagekit } from "@/lib/imagekit";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
@@ -29,6 +27,7 @@ export default function AdminDashboard() {
     amenities: "",
     images: [] as string[],
   });
+  const { toast } = useToast();
 
   useEffect(() => {
     if (
@@ -41,6 +40,7 @@ export default function AdminDashboard() {
       fetchUsers();
       fetchHotels();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session]);
 
   const fetchBookings = async () => {
@@ -95,8 +95,13 @@ export default function AdminDashboard() {
       });
       if (!res.ok) throw new Error("Failed to verify manager");
       fetchUsers();
+      toast({ title: "Success", description: "Manager verified" });
     } catch (err) {
-      setError((err as Error).message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: (err as Error).message,
+      });
     } finally {
       setLoading(false);
     }
@@ -112,8 +117,13 @@ export default function AdminDashboard() {
       });
       if (!res.ok) throw new Error("Failed to confirm booking");
       fetchBookings();
+      toast({ title: "Success", description: "Booking confirmed" });
     } catch (err) {
-      setError((err as Error).message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: (err as Error).message,
+      });
     } finally {
       setLoading(false);
     }
@@ -138,8 +148,14 @@ export default function AdminDashboard() {
         ...prev,
         images: [...prev.images, ...imageUrls],
       }));
+      toast({ title: "Success", description: "Images uploaded" });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-      setError("Failed to upload images");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to upload images",
+      });
     } finally {
       setLoading(false);
     }
@@ -167,15 +183,17 @@ export default function AdminDashboard() {
         images: [],
       });
       fetchHotels();
+      toast({ title: "Success", description: "Hotel added" });
     } catch (err) {
-      setError((err as Error).message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: (err as Error).message,
+      });
     } finally {
       setLoading(false);
     }
   };
-
-  if (status === "loading") return <div>Loading...</div>;
-  if (error) return <div className="container mx-auto px-4 py-16">{error}</div>;
 
   const deleteHotel = async (hotelId: string) => {
     setLoading(true);
@@ -185,8 +203,13 @@ export default function AdminDashboard() {
       });
       if (!res.ok) throw new Error("Failed to delete hotel");
       fetchHotels();
+      toast({ title: "Success", description: "Hotel deleted" });
     } catch (err) {
-      setError((err as Error).message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: (err as Error).message,
+      });
     } finally {
       setLoading(false);
     }
@@ -202,18 +225,25 @@ export default function AdminDashboard() {
       });
       if (!res.ok) throw new Error("Failed to update hotel");
       fetchHotels();
+      toast({ title: "Success", description: "Hotel updated" });
     } catch (err) {
-      setError((err as Error).message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: (err as Error).message,
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  if (status === "loading") return <div>Loading...</div>;
+  if (error) return <div className="container mx-auto px-4 py-16">{error}</div>;
+
   return (
     <div className="container mx-auto px-4 py-16">
       <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
 
-      {/* Add Hotel Form */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Add New Hotel</h2>
         <Card>
@@ -224,6 +254,7 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setNewHotel({ ...newHotel, name: e.target.value })
               }
+              disabled={loading}
             />
             <Input
               placeholder="Slug"
@@ -231,6 +262,7 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setNewHotel({ ...newHotel, slug: e.target.value })
               }
+              disabled={loading}
             />
             <Input
               placeholder="Location"
@@ -238,6 +270,7 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setNewHotel({ ...newHotel, location: e.target.value })
               }
+              disabled={loading}
             />
             <Input
               placeholder="Description"
@@ -245,14 +278,19 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setNewHotel({ ...newHotel, description: e.target.value })
               }
+              disabled={loading}
             />
             <Input
               type="number"
               placeholder="Price"
               value={newHotel.price}
               onChange={(e) =>
-                setNewHotel({ ...newHotel, price: parseInt(e.target.value) })
+                setNewHotel({
+                  ...newHotel,
+                  price: parseInt(e.target.value) || 0,
+                })
               }
+              disabled={loading}
             />
             <Input
               placeholder="Amenities (comma-separated)"
@@ -260,10 +298,16 @@ export default function AdminDashboard() {
               onChange={(e) =>
                 setNewHotel({ ...newHotel, amenities: e.target.value })
               }
+              disabled={loading}
             />
-            <Input type="file" multiple onChange={handleImageUpload} />
+            <Input
+              type="file"
+              multiple
+              onChange={handleImageUpload}
+              disabled={loading}
+            />
             <Button onClick={addHotel} disabled={loading}>
-              Add Hotel
+              {loading ? "Adding..." : "Add Hotel"}
             </Button>
           </CardContent>
         </Card>
@@ -271,41 +315,55 @@ export default function AdminDashboard() {
 
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Pending Bookings</h2>
-        <div className="grid gap-4">
-          {bookings.map((booking: any) => (
-            <Card key={booking._id}>
-              <CardContent className="p-6">
-                <p>Hotel: {booking.hotel.name}</p>
-                <p>Email: {booking.userEmail}</p>
-                <p>
-                  Check-in: {new Date(booking.checkIn).toLocaleDateString()}
-                </p>
-                <Button onClick={() => confirmBooking(booking._id)}>
-                  Confirm
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Pending Managers</h2>
-        <div className="grid gap-4">
-          {users
-            .filter((u: any) => u.role === "pending")
-            .map((user: any) => (
-              <Card key={user._id}>
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <div className="grid gap-4">
+            {bookings.map((booking: any) => (
+              <Card key={booking._id}>
                 <CardContent className="p-6">
-                  <p>Name: {user.name}</p>
-                  <p>Email: {user.email}</p>
-                  <Button onClick={() => verifyManager(user._id, [])}>
-                    Verify as Manager
+                  <p>Hotel: {booking.hotel.name}</p>
+                  <p>Email: {booking.userEmail}</p>
+                  <p>
+                    Check-in: {new Date(booking.checkIn).toLocaleDateString()}
+                  </p>
+                  <Button
+                    onClick={() => confirmBooking(booking._id)}
+                    disabled={loading}
+                  >
+                    Confirm
                   </Button>
                 </CardContent>
               </Card>
             ))}
-        </div>
+          </div>
+        )}
+      </section>
+
+      <section className="mb-12">
+        <h2 className="text-2xl font-semibold mb-4">Pending Managers</h2>
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <div className="grid gap-4">
+            {users
+              .filter((u: any) => u.role === "pending")
+              .map((user: any) => (
+                <Card key={user._id}>
+                  <CardContent className="p-6">
+                    <p>Name: {user.name}</p>
+                    <p>Email: {user.email}</p>
+                    <Button
+                      onClick={() => verifyManager(user._id, [])}
+                      disabled={loading}
+                    >
+                      Verify as Manager
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
+        )}
       </section>
 
       <section>
@@ -325,7 +383,7 @@ export default function AdminDashboard() {
                       variant="outline"
                       onClick={() =>
                         updateHotel(hotel._id, { price: hotel.price + 10 })
-                      } // Example update
+                      }
                       disabled={loading}
                     >
                       Update Price

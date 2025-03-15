@@ -5,73 +5,44 @@ import { Button } from "@/components/ui/button";
 import { Star, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-
-const HOTELS = [
-  {
-    id: 1,
-    slug: "the-ritz-carlton",
-    name: "Grand Hyatt",
-    location: "Singapore",
-    rating: 4.8,
-    price: 450,
-    image:
-      "https://images.unsplash.com/photo-1455587734955-081b22074882?auto=format&fit=crop&q=80",
-  },
-  {
-    id: 2,
-    slug: "burj-al-arab",
-    name: "The Peninsula",
-    location: "Hong Kong",
-    rating: 4.9,
-    price: 600,
-    image:
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&q=80",
-  },
-  {
-    id: 3,
-    slug: "mandarin-oriental",
-    name: "Mandarin Oriental",
-    location: "Bangkok",
-    rating: 4.7,
-    price: 380,
-    image:
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80",
-  },
-  {
-    id: 4,
-    slug: "waldorf-astoria",
-    name: "Waldorf Astoria",
-    location: "New York",
-    rating: 4.8,
-    price: 750,
-    image:
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80",
-  },
-  {
-    id: 5,
-    slug: "park-hyatt",
-    name: "Park Hyatt",
-    location: "Sydney",
-    rating: 4.7,
-    price: 480,
-    image:
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80",
-  },
-];
+import { useEffect, useState } from "react";
 
 export default function FeaturedHotels() {
   const router = useRouter();
+  const [hotels, setHotels] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchHotels = async () => {
+      try {
+        const res = await fetch("/api/hotels");
+        if (!res.ok) throw new Error("Failed to fetch hotels");
+        const data = await res.json();
+        setHotels(data.slice(0, 5)); // Limit to 5 featured hotels
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHotels();
+  }, []);
+
+  if (loading) return <div className="py-16 text-center">Loading...</div>;
+  if (error) return <div className="py-16 text-center">{error}</div>;
 
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold mb-8">Featured Hotels</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {HOTELS.map((hotel) => (
-            <Card key={hotel.id} className="overflow-hidden">
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          {hotels.map((hotel: any) => (
+            <Card key={hotel._id} className="overflow-hidden">
               <div className="aspect-video relative overflow-hidden">
                 <Image
-                  src={hotel.image}
+                  src={hotel.images[0]?.url || "/placeholder.jpg"}
                   alt={hotel.name}
                   layout="fill"
                   objectFit="cover"

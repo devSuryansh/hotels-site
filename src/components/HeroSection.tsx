@@ -1,74 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const FEATURED_HOTELS = [
-  {
-    id: 1,
-    slug: "the-ritz-carlton",
-    name: "The Ritz-Carlton",
-    location: "Paris, France",
-    image:
-      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80",
-  },
-  {
-    id: 2,
-    slug: "burj-al-arab",
-    name: "Burj Al Arab",
-    location: "Dubai, UAE",
-    image:
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80",
-  },
-  {
-    id: 3,
-    slug: "four-seasons",
-    name: "Four Seasons",
-    location: "Bora Bora",
-    image:
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80",
-  },
-  {
-    id: 4,
-    slug: "aman-tokyo",
-    name: "Aman Tokyo",
-    location: "Tokyo, Japan",
-    image:
-      "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&q=80",
-  },
-  {
-    id: 5,
-    slug: "bellagio",
-    name: "Bellagio",
-    location: "Las Vegas, USA",
-    image:
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80",
-  },
-];
-
 export default function HeroSection() {
+  const [hotels, setHotels] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  useEffect(() => {
+    const fetchHotels = async () => {
+      try {
+        const res = await fetch("/api/hotels");
+        if (!res.ok) throw new Error("Failed to fetch hotels");
+        const data = await res.json();
+        setHotels(data.slice(0, 5)); // Limit to 5 featured hotels
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHotels();
+  }, []);
+
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % FEATURED_HOTELS.length);
+    setCurrentIndex((prev) => (prev + 1) % hotels.length);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) =>
-      prev === 0 ? FEATURED_HOTELS.length - 1 : prev - 1
-    );
+    setCurrentIndex((prev) => (prev === 0 ? hotels.length - 1 : prev - 1));
   };
 
-  const currentHotel = FEATURED_HOTELS[currentIndex];
+  if (loading)
+    return <div className="h-[80vh] mt-16 text-center">Loading...</div>;
+  if (error) return <div className="h-[80vh] mt-16 text-center">{error}</div>;
+  if (!hotels.length)
+    return (
+      <div className="h-[80vh] mt-16 text-center">No hotels available</div>
+    );
+
+  const currentHotel = hotels[currentIndex];
 
   return (
     <div className="relative h-[80vh] mt-16">
       <div
         className="absolute inset-0 bg-cover bg-center transition-all duration-500"
-        style={{ backgroundImage: `url(${currentHotel.image})` }}
+        style={{
+          backgroundImage: `url(${
+            currentHotel.images[0]?.url || "/placeholder.jpg"
+          })`,
+        }}
       >
         <div className="absolute inset-0 bg-black/40" />
       </div>

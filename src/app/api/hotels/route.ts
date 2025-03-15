@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Hotel from "@/models/Hotel";
-import { request } from "http";
 
-export async function GET() {
+export async function GET(request: Request) {
   await dbConnect();
   const { searchParams } = new URL(request.url);
   const slug = searchParams.get("slug");
