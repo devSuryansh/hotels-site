@@ -7,7 +7,7 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 
 // Define the auth options
-export const authOptions = {
+const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -60,9 +60,6 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-// Export the handler directly
-export const { handlers, auth } = NextAuth(authOptions);
-
-// Export GET and POST handlers
-export const GET = handlers.GET;
-export const POST = handlers.POST;
+// Export the handler directly for GET and POST
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
