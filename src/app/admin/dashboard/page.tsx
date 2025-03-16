@@ -57,7 +57,7 @@ export default function AdminDashboard() {
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/bookings");
+      const res = await fetch("/api/booking");
       if (!res.ok) throw new Error("Failed to fetch bookings");
       const data = await res.json();
       setBookings(data);
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
   const confirmBooking = async (bookingId: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/bookings/${bookingId}`, {
+      const res = await fetch(`/api/booking/${bookingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "confirmed" }),
