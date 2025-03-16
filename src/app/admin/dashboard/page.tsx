@@ -10,6 +10,16 @@ import { Input } from "@/components/ui/input";
 import { imagekit } from "@/lib/imagekit";
 import { useToast } from "@/hooks/use-toast";
 
+// Extend the default session type
+declare module "next-auth" {
+  interface User {
+    role?: string;
+  }
+  interface Session {
+    user?: User;
+  }
+}
+
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -32,10 +42,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (
       status === "unauthenticated" ||
-      (session && session.user.role !== "admin")
+      !session?.user ||
+      session.user.role !== "admin"
     ) {
       router.push("/admin/login");
-    } else if (session?.user.role === "admin") {
+    } else if (session.user.role === "admin") {
       fetchBookings();
       fetchUsers();
       fetchHotels();
@@ -135,9 +146,9 @@ export default function AdminDashboard() {
 
     setLoading(true);
     try {
-      const uploadPromises = Array.from(files).map((file) =>
+      const uploadPromises = Array.from(files).map(async (file) =>
         imagekit.upload({
-          file,
+          file: Buffer.from(await file.arrayBuffer()),
           fileName: `${Date.now()}-${file.name}`,
           folder: "/hotels",
         })
