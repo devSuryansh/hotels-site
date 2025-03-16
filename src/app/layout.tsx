@@ -2,11 +2,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Providers from "@/components/Providers";
 import { ReactNode } from "react";
-import { ToastProvider } from "@/components/ui/toast";
-import { SessionProvider } from "next-auth/react"; // Explicit import
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,13 +16,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
     <html lang="en" className={inter.className}>
       <body>
-        <SessionProvider>
-          <ToastProvider>
-            <Navbar />
-            {children}
-            <Footer />
-          </ToastProvider>
-        </SessionProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
