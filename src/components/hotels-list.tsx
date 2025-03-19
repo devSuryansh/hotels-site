@@ -1,97 +1,84 @@
-"use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Star, Edit, Trash2 } from "lucide-react"
-
-interface Hotel {
-  id: string
-  name: string
-  location: string
-  image: string
-  price: number
-  rating: number
-}
-
-const initialHotels: Hotel[] = [
-  {
-    id: "1",
-    name: "Grand Hotel",
-    location: "New York, USA",
-    image: "/placeholder.svg",
-    price: 299,
-    rating: 4.8,
-  },
-  {
-    id: "2",
-    name: "Seaside Resort",
-    location: "Miami, USA",
-    image: "/placeholder.svg",
-    price: 199,
-    rating: 4.5,
-  },
-  {
-    id: "3",
-    name: "Mountain View Lodge",
-    location: "Denver, USA",
-    image: "/placeholder.svg",
-    price: 149,
-    rating: 4.2,
-  },
-  {
-    id: "4",
-    name: "City Center Hotel",
-    location: "Chicago, USA",
-    image: "/placeholder.svg",
-    price: 179,
-    rating: 4.0,
-  },
-]
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Star } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 export function HotelsList() {
-  const [hotels] = useState<Hotel[]>(initialHotels)
+  const [hotels, setHotels] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchHotels = async () => {
+      try {
+        const res = await fetch("/api/hotels");
+        if (!res.ok) throw new Error("Failed to fetch hotels");
+        const data = await res.json();
+        // Sort by creation date (assuming timestamps are available) and limit to 5
+        const sortedHotels = data
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+          .slice(0, 5);
+        setHotels(sortedHotels);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHotels();
+  }, []);
+
+  if (loading) return <div>Loading hotels...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {hotels.map((hotel) => (
-        <Card key={hotel.id} className="overflow-hidden">
-          <div className="relative h-48 w-full">
-            <Image src={hotel.image || "/placeholder.svg"} alt={hotel.name} fill className="object-cover" />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {hotels.map((hotel: any) => (
+        <Card key={hotel._id} className="overflow-hidden">
+          <div className="aspect-video relative overflow-hidden">
+            <Image
+              src={hotel.images[0]?.url || "/placeholder.jpg"}
+              alt={hotel.name}
+              layout="fill"
+              objectFit="cover"
+              className="hover:scale-105 transition-transform duration-300"
+            />
           </div>
           <CardContent className="p-4">
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="font-semibold">{hotel.name}</h3>
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Star className="h-3 w-3 fill-current" />
-                {hotel.rating}
-              </Badge>
-            </div>
-            <p className="mb-4 text-sm text-muted-foreground">{hotel.location}</p>
-            <div className="flex items-center justify-between">
-              <p className="font-medium">
-                ${hotel.price} <span className="text-xs text-muted-foreground">/ night</span>
-              </p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="icon" asChild>
-                  <Link href={`/hotels/${hotel.id}/edit`}>
-                    <Edit className="h-4 w-4" />
-                    <span className="sr-only">Edit</span>
-                  </Link>
-                </Button>
-                <Button variant="outline" size="icon" className="text-red-500">
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Delete</span>
-                </Button>
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h3 className="text-lg font-semibold">{hotel.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {hotel.location}
+                </p>
+              </div>
+              <div className="flex items-center">
+                <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                <span>{hotel.rating}</span>
               </div>
             </div>
+            <p className="text-lg font-bold">
+              ${hotel.price}
+              <span className="text-sm text-muted-foreground">/night</span>
+            </p>
           </CardContent>
+          <CardFooter className="p-4 pt-0">
+            <Link href={`/admin/hotels/${hotel._id}`}>
+              <Button variant="outline" className="w-full">
+                View Details
+              </Button>
+            </Link>
+          </CardFooter>
         </Card>
       ))}
     </div>
-  )
+  );
 }
-

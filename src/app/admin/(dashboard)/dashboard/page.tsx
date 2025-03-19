@@ -1,15 +1,20 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DashboardStats } from "@/components/dashboard-stats"
-import { RecentBookings } from "@/components/recent-bookings"
-import { HotelsList } from "@/components/hotels-list"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardStats } from "@/components/dashboard-stats";
+import { RecentBookings } from "@/components/recent-bookings";
+import { HotelsList } from "@/components/hotels-list";
 
 export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-3xl font-bold">Dashboard</h1>
       <DashboardStats />
-
       <Tabs defaultValue="bookings" className="w-full">
         <TabsList>
           <TabsTrigger value="bookings">Recent Bookings</TabsTrigger>
@@ -19,7 +24,9 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Recent Booking Requests</CardTitle>
-              <CardDescription>Manage and approve recent booking requests</CardDescription>
+              <CardDescription>
+                Manage and approve recent booking requests
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <RecentBookings />
@@ -39,6 +46,5 @@ export default function DashboardPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
-
