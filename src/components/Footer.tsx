@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-bold text-white mb-4">LuxStay</h3>
+            <h3 className="text-xl font-bold text-white mb-4">Amit Hotels</h3>
             <p className="text-sm">
               Discover the India&apos;s best hotels and resorts. Book your
               perfect stay with us.

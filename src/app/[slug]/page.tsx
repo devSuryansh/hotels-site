@@ -88,7 +88,7 @@ export default function HotelPage() {
     return <div className="container mx-auto px-4 py-16">Hotel not found</div>;
 
   return (
-    <div className="container mx-auto px-4 py-16">
+    <div className="container mx-auto px-4 py-16 mt-16">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">{hotel.name}</h1>
         <div className="flex items-center gap-4 text-muted-foreground">
