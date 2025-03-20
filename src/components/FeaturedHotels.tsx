@@ -64,7 +64,7 @@ export default function FeaturedHotels() {
                   </div>
                 </div>
                 <p className="text-2xl font-bold">
-                  ${hotel.price}
+                  ₹{hotel.price}
                   <span className="text-sm text-muted-foreground">/night</span>
                 </p>
               </CardContent>

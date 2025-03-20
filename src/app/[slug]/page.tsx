@@ -148,7 +148,7 @@ export default function HotelPage() {
             <CardContent className="p-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="mb-6">
-                  <p className="text-3xl font-bold mb-2">${hotel.price}</p>
+                  <p className="text-3xl font-bold mb-2">₹{hotel.price}</p>
                   <p className="text-muted-foreground">per night</p>
                 </div>
 
