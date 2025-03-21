@@ -14,7 +14,7 @@ interface Hotel {
   images: { url: string }[];
 }
 
-export default function HeroSection() {
+const HeroSection = () => {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -45,8 +45,23 @@ export default function HeroSection() {
     setCurrentIndex((prev) => (prev === 0 ? hotels.length - 1 : prev - 1));
   };
 
-  if (loading)
-    return <div className="h-[80vh] mt-16 text-center">Loading...</div>;
+  // Skeleton UI for loading state
+  const SkeletonHero = () => (
+    <div className="relative h-[80vh] mt-16">
+      <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
+      <div className="relative h-full container mx-auto px-4 flex flex-col justify-center">
+        <div className="h-16 w-3/4 bg-gray-300 animate-pulse mb-4 rounded"></div>
+        <div className="h-8 w-1/2 bg-gray-300 animate-pulse mb-8 rounded"></div>
+        <div className="h-12 w-32 bg-gray-300 animate-pulse rounded"></div>
+      </div>
+      <div className="absolute bottom-8 right-8 flex space-x-2">
+        <div className="h-10 w-10 bg-gray-300 animate-pulse rounded-full"></div>
+        <div className="h-10 w-10 bg-gray-300 animate-pulse rounded-full"></div>
+      </div>
+    </div>
+  );
+
+  if (loading) return <SkeletonHero />;
   if (error) return <div className="h-[80vh] mt-16 text-center">{error}</div>;
   if (!hotels.length)
     return (
@@ -104,4 +119,6 @@ export default function HeroSection() {
       </div>
     </div>
   );
-}
+};
+
+export default HeroSection;
