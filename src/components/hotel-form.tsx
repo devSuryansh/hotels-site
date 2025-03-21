@@ -10,7 +10,6 @@ import { Card } from "@/components/ui/card";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,60 +20,91 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Loader2, Plus, X } from "lucide-react";
+import Image from "next/image";
 
-const amenities = [
-  { id: "wifi", label: "WiFi" },
-  { id: "pool", label: "Swimming Pool" },
-  { id: "gym", label: "Gym" },
-  { id: "spa", label: "Spa" },
-  { id: "restaurant", label: "Restaurant" },
-  { id: "bar", label: "Bar" },
-  { id: "parking", label: "Parking" },
-  { id: "ac", label: "Air Conditioning" },
-  { id: "roomService", label: "Room Service" },
-  { id: "conferenceRoom", label: "Conference Room" },
-  { id: "laundry", label: "Laundry Service" },
-  { id: "petFriendly", label: "Pet Friendly" },
-];
+const featureOptions = {
+  mainFeatures: ["wifi", "pool", "gym", "spa"],
+  dining: ["restaurant", "bar", "roomService"],
+  leisure: ["garden", "terrace", "entertainment"],
+  services: ["parking", "laundry", "concierge"],
+  roomComforts: ["ac", "tv", "minibar"],
+} as const;
 
+type FeatureCategory = keyof typeof featureOptions;
+
+// Updated schema matching the backend
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Hotel name must be at least 2 characters.",
-  }),
-  location: z.string().min(2, {
-    message: "Location must be at least 2 characters.",
-  }),
-  description: z.string().min(10, {
-    message: "Description must be at least 10 characters.",
-  }),
-  price: z.coerce.number().min(1, {
-    message: "Price must be at least 1.",
-  }),
-  amenities: z.array(z.string()).optional(),
-  images: z.array(z.string()).optional(),
+  name: z
+    .string()
+    .min(2, { message: "Hotel name must be at least 2 characters." }),
+  slug: z.string().min(2, { message: "Slug must be at least 2 characters." }),
+  address: z
+    .string()
+    .min(2, { message: "Address must be at least 2 characters." }),
+  locationUrl: z.string().url({ message: "Must be a valid URL." }),
+  description: z
+    .string()
+    .min(10, { message: "Description must be at least 10 characters." }),
+  policies: z
+    .string()
+    .min(10, { message: "Policies must be at least 10 characters." }),
+  features: z
+    .object({
+      mainFeatures: z.array(z.string()).optional(),
+      dining: z.array(z.string()).optional(),
+      leisure: z.array(z.string()).optional(),
+      services: z.array(z.string()).optional(),
+      roomComforts: z.array(z.string()).optional(),
+    })
+    .optional(),
+  roomTypes: z
+    .array(
+      z.object({
+        category: z.string().min(1, { message: "Room category is required." }),
+        pricePerNight: z.coerce
+          .number()
+          .min(1, { message: "Price must be at least 1." }),
+      })
+    )
+    .min(1, { message: "At least one room type is required." }),
+  nearbyAttractions: z.array(z.string()).optional(),
+  landmarks: z.array(z.string()).optional(),
+  images: z.array(z.string().url()).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface HotelFormProps {
-  hotelId?: string;
+  hotelId?: string; // For editing, we'll use slug instead of ID
 }
 
 export function HotelForm({ hotelId }: HotelFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isEditing, setIsEditing] = useState(!!hotelId);
+  const [newAttraction, setNewAttraction] = useState("");
+  const [newLandmark, setNewLandmark] = useState("");
+  const isEditing = !!hotelId;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      location: "",
+      slug: "",
+      address: "",
+      locationUrl: "",
       description: "",
-      price: 0,
-      amenities: [],
+      policies: "",
+      features: {
+        mainFeatures: [],
+        dining: [],
+        leisure: [],
+        services: [],
+        roomComforts: [],
+      },
+      roomTypes: [{ category: "", pricePerNight: 0 }],
+      nearbyAttractions: [],
+      landmarks: [],
       images: [],
     },
   });
@@ -82,36 +112,37 @@ export function HotelForm({ hotelId }: HotelFormProps) {
   useEffect(() => {
     if (hotelId) {
       setIsLoading(true);
-      // In a real app, you would fetch the hotel data from your API
-      // For demo purposes, we'll simulate an API call
-      setTimeout(() => {
-        form.reset({
-          name: "Grand Hotel",
-          location: "New York, USA",
-          description: "Luxury hotel in the heart of Manhattan",
-          price: 299,
-          amenities: ["wifi", "pool", "spa", "gym", "restaurant"],
-          images: ["/placeholder.svg", "/placeholder.svg"],
+      fetch(`/api/hotels?slug=${hotelId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) throw new Error(data.error);
+          form.reset(data);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error fetching hotel:", error);
+          setIsLoading(false);
         });
-        setIsLoading(false);
-      }, 1000);
     }
   }, [hotelId, form]);
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
     try {
-      // In a real app, you would send the data to your API
-      console.log(values);
+      const method = isEditing ? "PUT" : "POST";
+      const response = await fetch("/api/hotels", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
 
-      // Generate slug from name
-      const slug = values.name.toLowerCase().replace(/\s+/g, "-");
-      console.log("Generated slug:", slug);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save hotel");
+      }
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      router.push("/hotels");
+      const hotel = await response.json();
+      router.push(`/hotels?slug=${hotel.slug}`);
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -135,6 +166,44 @@ export function HotelForm({ hotelId }: HotelFormProps) {
     );
   };
 
+  const addRoomType = () => {
+    const currentRoomTypes = form.getValues().roomTypes || [];
+    form.setValue("roomTypes", [
+      ...currentRoomTypes,
+      { category: "", pricePerNight: 0 },
+    ]);
+  };
+
+  const removeRoomType = (index: number) => {
+    const currentRoomTypes = form.getValues().roomTypes || [];
+    form.setValue(
+      "roomTypes",
+      currentRoomTypes.filter((_, i) => i !== index)
+    );
+  };
+
+  const addAttraction = () => {
+    if (
+      newAttraction &&
+      !form.getValues().nearbyAttractions?.includes(newAttraction)
+    ) {
+      const currentAttractions = form.getValues().nearbyAttractions || [];
+      form.setValue("nearbyAttractions", [
+        ...currentAttractions,
+        newAttraction,
+      ]);
+      setNewAttraction("");
+    }
+  };
+
+  const addLandmark = () => {
+    if (newLandmark && !form.getValues().landmarks?.includes(newLandmark)) {
+      const currentLandmarks = form.getValues().landmarks || [];
+      form.setValue("landmarks", [...currentLandmarks, newLandmark]);
+      setNewLandmark("");
+    }
+  };
+
   if (isLoading && isEditing) {
     return (
       <div className="flex h-[400px] items-center justify-center">
@@ -156,21 +225,44 @@ export function HotelForm({ hotelId }: HotelFormProps) {
                 <FormControl>
                   <Input placeholder="Enter hotel name" {...field} />
                 </FormControl>
-                <FormDescription>
-                  This will be used to generate the hotel slug.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="location"
+            name="slug"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormLabel>Slug</FormLabel>
                 <FormControl>
-                  <Input placeholder="City, Country" {...field} />
+                  <Input placeholder="hotel-slug" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Address</FormLabel>
+                <FormControl>
+                  <Input placeholder="123 Main St, City" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="locationUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Location URL</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://maps.example.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -198,12 +290,16 @@ export function HotelForm({ hotelId }: HotelFormProps) {
 
         <FormField
           control={form.control}
-          name="price"
+          name="policies"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Price per Night ($)</FormLabel>
+              <FormLabel>Policies</FormLabel>
               <FormControl>
-                <Input type="number" min="0" {...field} />
+                <Textarea
+                  placeholder="Hotel policies"
+                  className="min-h-[120px]"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -211,27 +307,114 @@ export function HotelForm({ hotelId }: HotelFormProps) {
         />
 
         <div>
+          <Label>Room Types</Label>
+          {form.watch("roomTypes")?.map((_, index) => (
+            <div key={index} className="flex gap-4 mt-2 items-end">
+              <FormField
+                control={form.control}
+                name={`roomTypes.${index}.category`}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Deluxe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`roomTypes.${index}.pricePerNight`}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Price ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                onClick={() => removeRoomType(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          <Button type="button" onClick={addRoomType} className="mt-2">
+            <Plus className="mr-2 h-4 w-4" /> Add Room Type
+          </Button>
+        </div>
+
+        <div>
+          <Label>Features</Label>
+          {Object.entries(featureOptions).map(([category, options]) => (
+            <div key={category} className="mt-4">
+              <Label className="capitalize">{category}</Label>
+              <div className="mt-2 grid grid-cols-2 gap-4">
+                {options.map((option) => (
+                  <FormField
+                    key={option}
+                    control={form.control}
+                    name={`features.${category as FeatureCategory}`}
+                    render={({ field }) => (
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={
+                              (field.value as string[] | undefined)?.includes(
+                                option
+                              ) || false
+                            }
+                            onCheckedChange={(checked) => {
+                              const currentValues =
+                                (field.value as string[] | undefined) || [];
+                              field.onChange(
+                                checked
+                                  ? [...currentValues, option]
+                                  : currentValues.filter((v) => v !== option)
+                              );
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel className="cursor-pointer font-normal">
+                          {option}
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div>
           <Label>Images</Label>
           <div className="mt-2 flex gap-2">
             <Input
-              placeholder="Enter image URL (ImageKit link)"
+              placeholder="Enter image URL"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
             />
-            <Button type="button" onClick={addImage} className="shrink-0">
-              <Plus className="mr-2 h-4 w-4" />
-              Add
+            <Button type="button" onClick={addImage}>
+              <Plus className="mr-2 h-4 w-4" /> Add
             </Button>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             {form.watch("images")?.map((image, index) => (
               <Card key={index} className="overflow-hidden">
                 <div className="relative aspect-video">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={image || "/placeholder.svg"}
                     alt={`Hotel image ${index + 1}`}
-                    className="h-full w-full object-cover"
+                    fill // Use fill for responsive images
+                    className="object-cover"
                   />
                   <Button
                     type="button"
@@ -249,38 +432,77 @@ export function HotelForm({ hotelId }: HotelFormProps) {
         </div>
 
         <div>
-          <Label>Amenities</Label>
-          <div className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-            {amenities.map((amenity) => (
-              <FormField
-                key={amenity.id}
-                control={form.control}
-                name="amenities"
-                render={({ field }) => (
-                  <FormItem className="flex items-center space-x-2 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value?.includes(amenity.id)}
-                        onCheckedChange={(checked) => {
-                          const currentValues = field.value || [];
-                          if (checked) {
-                            field.onChange([...currentValues, amenity.id]);
-                          } else {
-                            field.onChange(
-                              currentValues.filter(
-                                (value) => value !== amenity.id
-                              )
-                            );
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormLabel className="cursor-pointer font-normal">
-                      {amenity.label}
-                    </FormLabel>
-                  </FormItem>
-                )}
-              />
+          <Label>Nearby Attractions</Label>
+          <div className="mt-2 flex gap-2">
+            <Input
+              placeholder="Enter attraction"
+              value={newAttraction}
+              onChange={(e) => setNewAttraction(e.target.value)}
+            />
+            <Button type="button" onClick={addAttraction}>
+              <Plus className="mr-2 h-4 w-4" /> Add
+            </Button>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {form.watch("nearbyAttractions")?.map((attraction, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-1 bg-muted p-2 rounded"
+              >
+                {attraction}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    form.setValue(
+                      "nearbyAttractions",
+                      form
+                        .getValues()
+                        .nearbyAttractions!.filter((_, i) => i !== index)
+                    )
+                  }
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <Label>Landmarks</Label>
+          <div className="mt-2 flex gap-2">
+            <Input
+              placeholder="Enter landmark"
+              value={newLandmark}
+              onChange={(e) => setNewLandmark(e.target.value)}
+            />
+            <Button type="button" onClick={addLandmark}>
+              <Plus className="mr-2 h-4 w-4" /> Add
+            </Button>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {form.watch("landmarks")?.map((landmark, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-1 bg-muted p-2 rounded"
+              >
+                {landmark}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    form.setValue(
+                      "landmarks",
+                      form.getValues().landmarks!.filter((_, i) => i !== index)
+                    )
+                  }
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             ))}
           </div>
         </div>
