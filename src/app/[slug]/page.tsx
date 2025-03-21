@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
+import NotFoundPage from "../not-found";
 
 const bookingSchema = z.object({
   checkIn: z.string().min(1, "Check-in date is required"),
@@ -83,9 +84,7 @@ export default function HotelPage() {
 
   if (loading)
     return <div className="container mx-auto px-4 py-16">Loading...</div>;
-  if (error) return <div className="container mx-auto px-4 py-16">{error}</div>;
-  if (!hotel)
-    return <div className="container mx-auto px-4 py-16">Hotel not found</div>;
+  if (error || !hotel) return <NotFoundPage />; // Updated condition
 
   return (
     <div className="container mx-auto px-4 py-16 mt-16">
