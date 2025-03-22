@@ -2,9 +2,18 @@
 
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MapPin, Star, Users, Wifi, Car, Coffee, Tv } from "lucide-react";
+import {
+  MapPin,
+  Star,
+  Wifi,
+  Car,
+  Tv,
+  Utensils,
+  Mountain,
+  Landmark,
+} from "lucide-react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -13,16 +22,27 @@ import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import NotFoundPage from "../not-found";
 
+// Updated Hotel interface to match your schema
 interface Hotel {
   _id: string;
   name: string;
   slug: string;
-  location: string;
+  address: string; // Renamed from 'location' to match schema
+  locationUrl: string;
   images: { url: string }[];
-  rating: number;
-  price: number;
+  ratings: number; // Renamed from 'rating' to match schema
   description: string;
-  amenities: string[];
+  policies: string;
+  features: {
+    mainFeatures: string[];
+    dining: string[];
+    leisure: string[];
+    services: string[];
+    roomComforts: string[];
+  };
+  roomTypes: { category: string; pricePerNight: number }[];
+  nearbyAttractions: string[];
+  landmarks: string[];
 }
 
 // Zod schema for form validation
@@ -182,7 +202,7 @@ const HotelPage = () => {
     </div>
   );
 
-  // Memoized images section
+  // Memoized Images Section
   const imagesSection = useMemo(() => {
     if (!hotel) return null;
     return (
@@ -190,13 +210,13 @@ const HotelPage = () => {
         {hotel.images.map((image, index) => (
           <div
             key={index}
-            className="aspect-video relative overflow-hidden rounded-lg"
+            className="aspect-video relative overflow-hidden rounded-lg shadow-md"
           >
             <Image
               src={image.url}
               alt={`${hotel.name} - Image ${index + 1}`}
-              layout="fill"
-              objectFit="cover"
+              fill
+              className="object-cover transition-transform duration-300 hover:scale-105"
             />
           </div>
         ))}
@@ -204,25 +224,99 @@ const HotelPage = () => {
     );
   }, [hotel]);
 
-  // Memoized amenities section
-  const amenitiesSection = useMemo(() => {
-    if (!hotel) return null;
+  // Memoized Features Section
+  const featuresSection = useMemo(() => {
+    if (!hotel || !hotel.features) return null;
+    const allFeatures = [
+      ...hotel.features.mainFeatures.map((f) => ({ icon: Wifi, text: f })),
+      ...hotel.features.dining.map((f) => ({ icon: Utensils, text: f })),
+      ...hotel.features.leisure.map((f) => ({ icon: Mountain, text: f })),
+      ...hotel.features.services.map((f) => ({ icon: Car, text: f })),
+      ...hotel.features.roomComforts.map((f) => ({ icon: Tv, text: f })),
+    ];
     return (
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Amenities</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {hotel.amenities.map((amenity, index) => (
-            <div key={index} className="flex items-center gap-2">
-              {index % 5 === 0 && <Wifi className="h-4 w-4" />}
-              {index % 5 === 1 && <Car className="h-4 w-4" />}
-              {index % 5 === 2 && <Coffee className="h-4 w-4" />}
-              {index % 5 === 3 && <Users className="h-4 w-4" />}
-              {index % 5 === 4 && <Tv className="h-4 w-4" />}
-              <span>{amenity}</span>
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Features & Amenities</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {allFeatures.map((feature, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <feature.icon className="h-4 w-4 text-primary" />
+                <span className="capitalize">{feature.text}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }, [hotel]);
+
+  // Memoized Room Types Section
+  const roomTypesSection = useMemo(() => {
+    if (!hotel || !hotel.roomTypes) return null;
+    return (
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Room Types</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {hotel.roomTypes.map((room, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center border-b pb-2"
+              >
+                <span className="font-medium">{room.category}</span>
+                <span className="text-muted-foreground">
+                  ₹{room.pricePerNight} / night
+                </span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }, [hotel]);
+
+  // Memoized Nearby Attractions & Landmarks
+  const nearbySection = useMemo(() => {
+    if (!hotel || (!hotel.nearbyAttractions && !hotel.landmarks)) return null;
+    return (
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Nearby Attractions & Landmarks</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <Mountain className="h-4 w-4" /> Attractions
+              </h3>
+              <ul className="list-disc pl-5">
+                {hotel.nearbyAttractions.map((attraction, index) => (
+                  <li key={index} className="text-muted-foreground">
+                    {attraction}
+                  </li>
+                ))}
+              </ul>
             </div>
-          ))}
-        </div>
-      </div>
+            <div>
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <Landmark className="h-4 w-4" /> Landmarks
+              </h3>
+              <ul className="list-disc pl-5">
+                {hotel.landmarks.map((landmark, index) => (
+                  <li key={index} className="text-muted-foreground">
+                    {landmark}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }, [hotel]);
 
@@ -245,38 +339,67 @@ const HotelPage = () => {
 
   return (
     <div ref={sectionRef} className="container mx-auto px-4 py-16 mt-16">
+      {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">{hotel.name}</h1>
-        <div className="flex items-center gap-4 text-muted-foreground">
-          <div className="flex items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-muted-foreground">
+          <a
+            href={hotel.locationUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center hover:underline"
+          >
             <MapPin className="h-4 w-4 mr-1" />
-            <span>{hotel.location}</span>
-          </div>
+            <span>{hotel.address}</span>
+          </a>
           <div className="flex items-center">
             <Star className="h-4 w-4 text-yellow-400 mr-1" />
-            <span>{hotel.rating}</span>
+            <span>{hotel.ratings} / 5</span>
           </div>
         </div>
       </div>
 
+      {/* Images */}
       {imagesSection}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <div className="prose max-w-none mb-8">
-            <h2 className="text-2xl font-semibold mb-4">About this hotel</h2>
-            <p className="text-muted-foreground">{hotel.description}</p>
-          </div>
-          {amenitiesSection}
+        <div className="lg:col-span-2 space-y-8">
+          {/* About */}
+          <Card>
+            <CardHeader>
+              <CardTitle>About {hotel.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">{hotel.description}</p>
+              <p className="mt-4 text-sm text-gray-500">
+                <strong>Policies:</strong> {hotel.policies}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Features */}
+          {featuresSection}
+
+          {/* Room Types */}
+          {roomTypesSection}
+
+          {/* Nearby Attractions & Landmarks */}
+          {nearbySection}
         </div>
 
+        {/* Booking Form */}
         <div className="lg:col-span-1">
-          <Card>
-            <CardContent className="p-6">
+          <Card className="sticky top-20">
+            <CardHeader>
+              <CardTitle>Book Your Stay</CardTitle>
+            </CardHeader>
+            <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="mb-6">
-                  <p className="text-3xl font-bold mb-2">₹{hotel.price}</p>
-                  <p className="text-muted-foreground">per night</p>
+                  <p className="text-3xl font-bold">
+                    ₹{Math.min(...hotel.roomTypes.map((r) => r.pricePerNight))}
+                  </p>
+                  <p className="text-muted-foreground">per night (starting)</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">
