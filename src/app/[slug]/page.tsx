@@ -22,15 +22,15 @@ import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import NotFoundPage from "../not-found";
 
-// Updated Hotel interface to match your schema
+// Hotel interface matching the schema
 interface Hotel {
   _id: string;
   name: string;
   slug: string;
-  address: string; // Renamed from 'location' to match schema
+  address: string;
   locationUrl: string;
   images: { url: string }[];
-  ratings: number; // Renamed from 'rating' to match schema
+  ratings: number;
   description: string;
   policies: string;
   features: {
@@ -108,10 +108,18 @@ const HotelPage = () => {
         const res = await fetch(`/api/hotels?slug=${slug}`, {
           cache: "force-cache",
         });
-        if (!res.ok) throw new Error("Hotel not found");
-        const data: Hotel[] = await res.json();
-        if (!data.length) throw new Error("Hotel not found");
-        setHotel(data[0]);
+
+        if (res.status === 404) {
+          setHotel(null); // Hotel not found
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch hotel data");
+        }
+
+        const data: Hotel = await res.json(); // Expect a single hotel object
+        setHotel(data);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -321,21 +329,17 @@ const HotelPage = () => {
   }, [hotel]);
 
   if (loading || !isVisible) return <SkeletonHotelPage />;
-  if (error || !hotel)
+  if (!hotel) return <NotFoundPage />;
+  if (error) {
     return (
       <div className="container mx-auto px-4 py-16 mt-16 text-center">
-        {error ? (
-          <>
-            <p className="text-red-500 mb-4">{error}</p>
-            <Button variant="outline" onClick={() => window.location.reload()}>
-              Retry
-            </Button>
-          </>
-        ) : (
-          <NotFoundPage />
-        )}
+        <p className="text-red-500 mb-4">{error}</p>
+        <Button variant="outline" onClick={() => window.location.reload()}>
+          Retry
+        </Button>
       </div>
     );
+  }
 
   return (
     <div ref={sectionRef} className="container mx-auto px-4 py-16 mt-16">
