@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import { Schema, model, models } from "mongoose";
 
-const hotelSchema = new mongoose.Schema({
+const HotelSchema = new Schema({
   name: { type: String, required: true },
   slug: { type: String, required: true, unique: true },
   address: { type: String, required: true },
@@ -9,11 +9,11 @@ const hotelSchema = new mongoose.Schema({
   policies: { type: String, required: true },
   ratings: { type: Number, default: 0 },
   features: {
-    mainFeatures: [String],
-    dining: [String],
-    leisure: [String],
-    services: [String],
-    roomComforts: [String],
+    mainFeatures: [{ type: String }],
+    dining: [{ type: String }],
+    leisure: [{ type: String }],
+    services: [{ type: String }],
+    roomComforts: [{ type: String }],
   },
   roomTypes: [
     {
@@ -21,10 +21,9 @@ const hotelSchema = new mongoose.Schema({
       pricePerNight: { type: Number, required: true },
     },
   ],
-  nearbyAttractions: [String],
-  landmarks: [String],
-  images: [{ url: String }],
-  manager: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  nearbyAttractions: [{ type: String }],
+  landmarks: [{ type: String }],
+  images: [{ url: { type: String, required: true } }],
 });
 
-export default mongoose.models.Hotel || mongoose.model("Hotel", hotelSchema);
+export default models.Hotel || model("Hotel", HotelSchema);
