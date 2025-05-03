@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -28,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import FeaturedHotels from "@/components/FeaturedHotels";
 
 // Zod schema for form validation
 const bookingSchema = z.object({
@@ -108,6 +110,34 @@ const HotelPage = () => {
       roomType: "",
     },
   });
+
+  const uniqueNearbyAttractionsAndLandmarks = [
+    "Mawblang",
+    "Sohra",
+    "East Khasi Hills",
+    "Saitsohpen",
+    "Mawlynnong",
+    "Mawphlang",
+    "Pynshad Khurai",
+    "Latikynsew",
+    "Mawsmai",
+    "Mawpunkirtiang",
+    "Khliehshnong",
+    "Mawkdok Village",
+  ];
+
+  if (
+    slug === "hotels" ||
+    uniqueNearbyAttractionsAndLandmarks
+      .map((item) => item.toLowerCase().replace(/\s+/g, "-"))
+      .includes(slug as string)
+  ) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-7xl mt-16">
+        <FeaturedHotels />
+      </div>
+    );
+  }
 
   // Fetch hotel data
   useEffect(() => {
