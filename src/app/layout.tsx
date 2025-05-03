@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Amit Hotels - Hotel Bookings",
-  description: "Book your perfect hotel stay with Amit Hotels",
+  title: "Hotels in Cherrapunji - Hotel Bookings",
+  description: "Book your perfect hotel stay in Cherrapunji",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
