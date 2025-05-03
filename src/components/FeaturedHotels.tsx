@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Bed } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState, useRef, useMemo } from "react";
 
@@ -30,6 +30,7 @@ interface Hotel {
 
 const FeaturedHotels = () => {
   const router = useRouter();
+  const { slug } = useParams();
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,10 +64,17 @@ const FeaturedHotels = () => {
 
     const fetchHotels = async () => {
       try {
-        const res = await fetch("/api/hotels", { cache: "force-cache" });
+        // If slug is provided and not "hotels", filter by landmark or attraction
+        const url =
+          slug && slug !== "hotels"
+            ? `/api/hotels?landmarkOrAttraction=${encodeURIComponent(
+                slug as string
+              )}`
+            : "/api/hotels";
+        const res = await fetch(url, { cache: "force-cache" });
         if (!res.ok) throw new Error("Failed to fetch hotels");
         const data: Hotel[] = await res.json();
-        setHotels(data); // Display all hotels
+        setHotels(data);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -74,7 +82,16 @@ const FeaturedHotels = () => {
       }
     };
     fetchHotels();
-  }, [isVisible]);
+  }, [isVisible, slug]);
+
+  // Format slug for display
+  const formatSlug = (slug: string | string[]) => {
+    if (Array.isArray(slug)) slug = slug[0];
+    return slug
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
 
   // Skeleton Card component
   const SkeletonCard = () => (
@@ -118,9 +135,8 @@ const FeaturedHotels = () => {
             <Image
               src={hotel.images[0]?.url || "/placeholder.jpg"}
               alt={hotel.name}
-              layout="fill"
-              objectFit="cover"
-              className="hover:scale-105 transition-transform duration-300"
+              fill
+              className="object-cover hover:scale-105 transition-transform duration-300"
             />
           </div>
           <CardHeader>
@@ -162,7 +178,7 @@ const FeaturedHotels = () => {
           <CardFooter className="p-6 pt-0">
             <Button
               className="w-full"
-              onClick={() => router.push(`/${hotel.slug}`)}
+              onClick={() => router.push(`/hotels/${hotel.slug}`)}
             >
               View Details
             </Button>
@@ -177,7 +193,9 @@ const FeaturedHotels = () => {
       <section ref={sectionRef} className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8 text-center">
-            Featured Hotels
+            {slug && slug !== "hotels"
+              ? `Hotels near ${formatSlug(slug)}`
+              : "Featured Hotels"}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {skeletonCards}
@@ -205,7 +223,11 @@ const FeaturedHotels = () => {
   return (
     <section ref={sectionRef} className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-8 text-center">Featured Hotels</h2>
+        <h2 className="text-3xl font-bold mb-8 text-center">
+          {slug && slug !== "hotels"
+            ? `Hotels near ${formatSlug(slug)}`
+            : "Featured Hotels"}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {hotelCards}
         </div>
