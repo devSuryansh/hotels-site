@@ -4,12 +4,12 @@ import Hotel from "@/models/Hotel";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  context: { params: Promise<{ slug: string }> }
 ) {
   await dbConnect();
 
   try {
-    const { slug } = params;
+    const { slug } = await context.params; // Await params to resolve the Promise
     console.log("Requested slug:", slug);
 
     if (!slug) {
