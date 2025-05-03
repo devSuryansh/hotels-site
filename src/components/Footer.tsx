@@ -9,7 +9,7 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Amit Hotels</h3>
             <p className="text-sm">
-              Discover the India&apos;s best hotels and resorts. Book your
+              Discover the Cherrapunji&apos;s best hotels and resorts. Book your
               perfect stay with us.
             </p>
           </div>
@@ -56,29 +56,32 @@ const Footer = () => {
 
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">
-              Popular Destinations
+              Nearby Landmarks
             </h4>
             <ul className="space-y-2">
-              <li>
-                <Link href="#" className="hover:text-white transition-colors">
-                  Paris
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-white transition-colors">
-                  Dubai
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-white transition-colors">
-                  Tokyo
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="hover:text-white transition-colors">
-                  New York
-                </Link>
-              </li>
+              {[
+                "Mawblang",
+                "Sohra",
+                "East Khasi Hills",
+                "Saitsohpen",
+                "Mawlynnong",
+                "Mawphlang",
+                "Pynshad Khurai",
+                "Latikynsew",
+                "Mawsmai",
+                "Mawpunkirtiang",
+                "Khliehshnong",
+                "Mawkdok Village",
+              ].map((attraction, index) => (
+                <li key={index}>
+                  <Link
+                    href={`/${attraction.toLowerCase().replace(/\s+/g, "-")}`}
+                    className="hover:text-white transition-colors"
+                  >
+                    {attraction}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

@@ -2,7 +2,6 @@
 
 import React from "react";
 import HotelSearch from "./HotelSearch";
-import Image from "next/image";
 import { motion } from "framer-motion";
 
 const HeroSection: React.FC = () => {
@@ -30,48 +29,6 @@ const HeroSection: React.FC = () => {
               <p className="text-sm md:text-base opacity-80">
                 Exclusive Availability and Rates
               </p>
-            </div>
-
-            {/* Language and Currency Selector */}
-            <div className="flex items-center gap-4 text-white">
-              <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-                <Image
-                  src="https://flagcdn.com/w20/in.png"
-                  alt="India Flag"
-                  width={20}
-                  height={14}
-                />
-                <span className="hidden sm:inline">English</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </div>
-              <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-                <span>INR</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </div>
             </div>
           </div>
         </header>

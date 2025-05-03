@@ -31,7 +31,7 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold text-primary">
-          Amit Hotels
+          Hotels in Cherrapunji
         </Link>
 
         <div className="hidden md:flex items-center space-x-6">
@@ -56,7 +56,7 @@ export default function Navbar() {
               {uniqueNearbyAttractionsAndLandmarks.map((item) => (
                 <DropdownMenuItem key={item} asChild>
                   <Link
-                    href={`/hotels/${item.toLowerCase().replace(/\s+/g, "-")}`}
+                    href={`/${item.toLowerCase().replace(/\s+/g, "-")}`}
                     className="w-full"
                   >
                     {item}
