@@ -31,6 +31,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FeaturedHotels from "@/components/FeaturedHotels";
 import NotFoundPage from "../not-found";
+import Search from "@/components/Search";
 
 // Zod schema for form validation
 const bookingSchema = z.object({
@@ -110,6 +111,8 @@ const HotelPage = () => {
       roomType: "",
     },
   });
+
+  if (slug === "search") return <Search />;
 
   const uniqueNearbyAttractionsAndLandmarks = [
     "Mawblang",
