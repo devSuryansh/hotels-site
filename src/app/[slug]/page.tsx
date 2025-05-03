@@ -112,7 +112,12 @@ const HotelPage = () => {
     },
   });
 
-  if (slug === "search") return <Search />;
+  if (slug === "search")
+    return (
+      <div className="mt-16">
+        <Search />
+      </div>
+    );
 
   const uniqueNearbyAttractionsAndLandmarks = [
     "Mawblang",
