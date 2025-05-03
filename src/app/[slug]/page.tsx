@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FeaturedHotels from "@/components/FeaturedHotels";
+import NotFoundPage from "../not-found";
 
 // Zod schema for form validation
 const bookingSchema = z.object({
@@ -89,7 +90,6 @@ const featureIcons: Record<
 
 const HotelPage = () => {
   const { slug } = useParams();
-  const router = useRouter();
   const { toast } = useToast();
   const [hotel, setHotel] = useState<Hotel | null>(null);
   const [loading, setLoading] = useState(true);
@@ -311,19 +311,7 @@ const HotelPage = () => {
   }
 
   if (error || !hotel) {
-    return (
-      <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col justify-center items-center">
-        <h2 className="text-2xl font-bold text-red-500 mb-4">
-          {error || "Hotel not found"}
-        </h2>
-        <p className="text-muted-foreground mb-6">
-          Sorry, we couldn’t find the hotel you’re looking for.
-        </p>
-        <Button onClick={() => router.push("/hotels")} variant="outline">
-          Back to Hotels
-        </Button>
-      </div>
-    );
+    return <NotFoundPage />;
   }
 
   return (

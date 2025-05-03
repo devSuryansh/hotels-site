@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Search, TriangleAlert } from "lucide-react";
+import { ArrowLeft, Search, TriangleAlert, Hotel } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +29,6 @@ const NotFoundPage = () => {
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="relative w-full md:w-1/2 aspect-video rounded-lg overflow-hidden">
               <Image
-                // src="/placeholder.svg?height=300&width=500"
                 src="https://plus.unsplash.com/premium_vector-1721386085379-8df3c43a062d?w=300&h=500"
                 alt="Hotel lobby"
                 fill
@@ -47,8 +46,9 @@ const NotFoundPage = () => {
             <div className="w-full md:w-1/2 space-y-4">
               <h2 className="text-xl font-semibold">Looking for something?</h2>
               <p className="text-muted-foreground">
-                The page you requested seems to have checked out. Perhaps one of
-                these options will help you find what you&apos;re looking for.
+                The page you requested seems to have checked out. Try one of
+                these options to find your perfect stay or explore nearby
+                attractions.
               </p>
             </div>
           </div>
@@ -64,6 +64,12 @@ const NotFoundPage = () => {
             <Link href="/search" className="flex items-center gap-2">
               <Search size={16} />
               <span>Search Our Site</span>
+            </Link>
+          </Button>
+          <Button variant="secondary" asChild>
+            <Link href="/hotels" className="flex items-center gap-2">
+              <Hotel size={16} />
+              <span>Explore Hotels</span>
             </Link>
           </Button>
         </CardFooter>
