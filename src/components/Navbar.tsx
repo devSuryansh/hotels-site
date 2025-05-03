@@ -3,7 +3,28 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Menu } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Search, Menu, ChevronDown } from "lucide-react";
+
+const uniqueNearbyAttractionsAndLandmarks = [
+  "Mawblang",
+  "Sohra",
+  "East Khasi Hills",
+  "Saitsohpen",
+  "Mawlynnong",
+  "Mawphlang",
+  "Pynshad Khurai",
+  "Latikynsew",
+  "Mawsmai",
+  "Mawpunkirtiang",
+  "Khliehshnong",
+  "Mawkdok Village",
+];
 
 export default function Navbar() {
   return (
@@ -25,9 +46,25 @@ export default function Navbar() {
           <Link href="/hotels" className="text-sm font-medium">
             Hotels
           </Link>
-          <Link href="/destinations" className="text-sm font-medium">
-            Destinations
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="text-sm font-medium">
+                Attractions <ChevronDown className="ml-1 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              {uniqueNearbyAttractionsAndLandmarks.map((item) => (
+                <DropdownMenuItem key={item} asChild>
+                  <Link
+                    href={`/hotels/${item.toLowerCase().replace(/\s+/g, "-")}`}
+                    className="w-full"
+                  >
+                    {item}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Link href="/deals" className="text-sm font-medium">
             Deals
           </Link>
