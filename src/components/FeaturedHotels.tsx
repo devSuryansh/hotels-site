@@ -119,6 +119,7 @@ const FeaturedHotels = () => {
     () =>
       Array(3)
         .fill(0)
+        // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
         .map((_, index) => <SkeletonCard key={index} />),
     []
   );
@@ -178,7 +179,7 @@ const FeaturedHotels = () => {
           <CardFooter className="p-6 pt-0">
             <Button
               className="w-full"
-              onClick={() => router.push(`/hotels/${hotel.slug}`)}
+              onClick={() => router.push(`/${hotel.slug}`)}
             >
               View Details
             </Button>
