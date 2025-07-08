@@ -174,3 +174,5 @@ next-env.d.ts
 # cursor
 .cursorrules
 .hintrc
+
+bun.lock
