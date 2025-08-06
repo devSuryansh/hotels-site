@@ -6,6 +6,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { X, Plus, Upload, Trash2, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { authenticatedFetch } from "@/lib/auth";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +43,20 @@ const addonSchema = z.object({
   price: z.coerce.number().min(0, "Price must be positive"),
 });
 
+const metaTagsSchema = z.object({
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(60, "Title should be under 60 characters"),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .max(160, "Description should be under 160 characters"),
+  keywords: z.string().min(1, "Keywords are required"),
+  ogTitle: z.string().optional(),
+  ogDescription: z.string().optional(),
+});
+
 const hotelFormSchema = z.object({
   name: z.string().min(2, "Hotel name must be at least 2 characters"),
   slug: z
@@ -71,6 +86,7 @@ const hotelFormSchema = z.object({
   landmarks: z.array(z.string()),
   rooms: z.array(roomSchema),
   addons: z.array(addonSchema),
+  metaTags: metaTagsSchema.optional(),
 });
 
 type HotelFormValues = z.infer<typeof hotelFormSchema>;
@@ -324,6 +340,7 @@ export function AddHotelForm({
   const [images, setImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generatedMetaTags, setGeneratedMetaTags] = useState<any>(null);
+  const [isGeneratingMetaTags, setIsGeneratingMetaTags] = useState(false);
 
   const form = useForm<HotelFormValues>({
     resolver: zodResolver(hotelFormSchema),
@@ -340,6 +357,13 @@ export function AddHotelForm({
       landmarks: [],
       rooms: [],
       addons: [],
+      metaTags: {
+        title: "",
+        description: "",
+        keywords: "",
+        ogTitle: "",
+        ogDescription: "",
+      },
     },
   });
 
@@ -361,6 +385,68 @@ export function AddHotelForm({
     name: "addons",
   });
 
+  // Generate meta tags using AI
+  const generateMetaTags = async () => {
+    setIsGeneratingMetaTags(true);
+    try {
+      const formData = form.getValues();
+
+      if (!formData.name || !formData.description || !formData.location) {
+        toast({
+          title: "Missing Information",
+          description:
+            "Please fill in hotel name, description, and location first.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await authenticatedFetch(
+        "/api/hotels/generate-meta-tags",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            hotelName: formData.name,
+            hotelDescription: formData.description,
+            hotelLocation: formData.location,
+            hotelFeatures: formData.features,
+            nearbyAttractions: formData.nearbyAttractions,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to generate meta tags");
+      }
+
+      const metaTags = await response.json();
+
+      // Set the generated meta tags in the form
+      form.setValue("metaTags.title", metaTags.title);
+      form.setValue("metaTags.description", metaTags.description);
+      form.setValue("metaTags.keywords", metaTags.keywords);
+      form.setValue("metaTags.ogTitle", metaTags.ogTitle);
+      form.setValue("metaTags.ogDescription", metaTags.ogDescription);
+
+      setGeneratedMetaTags(metaTags);
+
+      toast({
+        title: "Meta Tags Generated!",
+        description:
+          "AI has generated SEO meta tags. You can edit them if needed.",
+      });
+    } catch (error) {
+      console.error("Error generating meta tags:", error);
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate meta tags. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingMetaTags(false);
+    }
+  };
+
   // Generate slug from name
   const generateSlug = (name: string) => {
     return name
@@ -378,24 +464,24 @@ export function AddHotelForm({
         ...data,
         images,
         priceRange: [data.priceRange.min, data.priceRange.max],
+        metaTags: data.metaTags || null,
       };
 
-      const response = await fetch("/api/hotels/create", {
+      const response = await authenticatedFetch("/api/hotels/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(hotelData),
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        setGeneratedMetaTags(result.metaTags);
         toast({
           title: "Hotel created successfully!",
-          description: "The hotel has been added with AI-generated meta tags.",
+          description: "The hotel has been added with custom meta tags.",
         });
         form.reset();
         setImages([]);
+        setGeneratedMetaTags(null);
         onHotelAdded();
         onOpenChange(false);
       } else {
@@ -833,12 +919,156 @@ export function AddHotelForm({
                 </CardContent>
               </Card>
 
+              {/* Meta Tags */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center justify-between">
+                    SEO Meta Tags
+                    <Button
+                      type="button"
+                      onClick={generateMetaTags}
+                      size="sm"
+                      variant="outline"
+                      disabled={isGeneratingMetaTags}
+                    >
+                      {isGeneratingMetaTags ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Generate with AI
+                        </>
+                      )}
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="metaTags.title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Meta Title{" "}
+                          <span className="text-xs text-muted-foreground">
+                            (50-60 characters)
+                          </span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="e.g., Luxury Hotel in Cherrapunji - Mountain Views & Modern Amenities"
+                            maxLength={60}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          {field.value?.length || 0}/60 characters
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="metaTags.description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Meta Description{" "}
+                          <span className="text-xs text-muted-foreground">
+                            (150-160 characters)
+                          </span>
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            placeholder="e.g., Experience luxury accommodation in Cherrapunji with stunning mountain views, modern amenities, and easy access to waterfalls and attractions."
+                            maxLength={160}
+                            rows={3}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          {field.value?.length || 0}/160 characters
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="metaTags.keywords"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Keywords</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            placeholder="e.g., Cherrapunji hotel, luxury accommodation, mountain view hotel, waterfall tours, Meghalaya tourism"
+                            rows={2}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Comma-separated keywords for SEO
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="space-y-4 pt-4 border-t">
+                    <h4 className="font-medium text-sm text-muted-foreground">
+                      Open Graph (Social Media)
+                    </h4>
+
+                    <FormField
+                      control={form.control}
+                      name="metaTags.ogTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>OG Title (Optional)</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Title for social media sharing"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="metaTags.ogDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>OG Description (Optional)</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              placeholder="Description for social media sharing"
+                              rows={2}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Generated Meta Tags Display */}
               {generatedMetaTags && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg text-green-600">
-                      AI Generated Meta Tags
+                      AI Generated Meta Tags Preview
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
@@ -852,6 +1082,17 @@ export function AddHotelForm({
                     <div>
                       <strong>Keywords:</strong> {generatedMetaTags.keywords}
                     </div>
+                    {generatedMetaTags.ogTitle && (
+                      <div>
+                        <strong>OG Title:</strong> {generatedMetaTags.ogTitle}
+                      </div>
+                    )}
+                    {generatedMetaTags.ogDescription && (
+                      <div>
+                        <strong>OG Description:</strong>{" "}
+                        {generatedMetaTags.ogDescription}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
