@@ -45,6 +45,27 @@ export async function generateMetadata({
     };
   }
 
+  // Use stored meta tags if they exist, otherwise generate them
+  if (hotel.metaTags) {
+    return {
+      title: hotel.metaTags.title,
+      description: hotel.metaTags.description,
+      keywords: hotel.metaTags.keywords,
+      openGraph: {
+        title: hotel.metaTags.ogTitle || hotel.metaTags.title,
+        description: hotel.metaTags.ogDescription || hotel.metaTags.description,
+        images: hotel.images?.length > 0 ? [{ url: hotel.images[0] }] : [],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: hotel.metaTags.ogTitle || hotel.metaTags.title,
+        description: hotel.metaTags.ogDescription || hotel.metaTags.description,
+        images: hotel.images?.length > 0 ? [hotel.images[0]] : [],
+      },
+    };
+  }
+
+  // Fallback to AI-generated meta tags
   try {
     const meta = await generateDynamicMetaTags({
       hotelName: hotel.name,
@@ -58,6 +79,17 @@ export async function generateMetadata({
       title: meta.title,
       description: meta.description,
       keywords: meta.keywords,
+      openGraph: {
+        title: meta.ogTitle || meta.title,
+        description: meta.ogDescription || meta.description,
+        images: hotel.images?.length > 0 ? [{ url: hotel.images[0] }] : [],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: meta.ogTitle || meta.title,
+        description: meta.ogDescription || meta.description,
+        images: hotel.images?.length > 0 ? [hotel.images[0]] : [],
+      },
     };
   } catch (error) {
     console.error("Failed to generate meta tags:", error);
@@ -69,7 +101,8 @@ export async function generateMetadata({
 }
 
 export default async function HotelPage({ params }: HotelPageProps) {
-  const hotel = await fetchHotelBySlug(params.slug);
+  const { slug } = await params;
+  const hotel = await fetchHotelBySlug(slug);
 
   if (!hotel) {
     notFound();
