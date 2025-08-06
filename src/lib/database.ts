@@ -26,6 +26,7 @@ export async function getHotels(): Promise<Hotel[]> {
       policies: hotel.policies,
       rooms: hotel.rooms || [],
       addons: hotel.addons || [],
+      metaTags: hotel.metaTags || undefined,
     }));
   } catch (error) {
     console.error("Error fetching hotels:", error);
@@ -57,6 +58,7 @@ export async function getHotelBySlug(slug: string): Promise<Hotel | null> {
       policies: hotel.policies,
       rooms: hotel.rooms || [],
       addons: hotel.addons || [],
+      metaTags: hotel.metaTags || undefined,
     };
   } catch (error) {
     console.error("Error fetching hotel by slug:", error);
@@ -88,6 +90,7 @@ export async function getHotelById(id: string): Promise<Hotel | null> {
       policies: hotel.policies,
       rooms: hotel.rooms || [],
       addons: hotel.addons || [],
+      metaTags: hotel.metaTags || undefined,
     };
   } catch (error) {
     console.error("Error fetching hotel by ID:", error);
