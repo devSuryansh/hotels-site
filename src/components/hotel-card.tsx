@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { Hotel } from "@/lib/data";
+import type { Hotel } from "@/types";
 import {
   Card,
   CardContent,
