@@ -35,6 +35,12 @@ const GenerateDynamicMetaTagsOutputSchema = z.object({
     .describe(
       "A comma-separated string of SEO-optimized keywords for the hotel page."
     ),
+  ogTitle: z
+    .string()
+    .describe("The Open Graph title for social media sharing."),
+  ogDescription: z
+    .string()
+    .describe("The Open Graph description for social media sharing."),
 });
 export type GenerateDynamicMetaTagsOutput = z.infer<
   typeof GenerateDynamicMetaTagsOutputSchema
@@ -52,7 +58,7 @@ const prompt = ai.definePrompt({
   output: { schema: GenerateDynamicMetaTagsOutputSchema },
   prompt: `You are an SEO expert specializing in creating meta tags for hotel websites.
 
-  Generate an SEO-optimized title, description, and keywords for a hotel page based on the following information:
+  Generate an SEO-optimized title, description, keywords, and Open Graph tags for a hotel page based on the following information:
 
   Hotel Name: {{hotelName}}
   Description: {{hotelDescription}}
@@ -60,11 +66,15 @@ const prompt = ai.definePrompt({
   Features: {{#each hotelFeatures}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Nearby Attractions: {{#each nearbyAttractions}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
 
-  Title: (Aim for 50-60 characters, include the hotel name and a key selling point)
-  Description: (Aim for 150-160 characters, summarize the hotel and its key features and location)
-  Keywords: (A comma-separated list of 5-10 relevant keywords, including hotel name, location, features, and attractions)
+  Requirements:
+  - Title: (50-60 characters, include the hotel name and a key selling point)
+  - Description: (150-160 characters, summarize the hotel and its key features and location)
+  - Keywords: (A comma-separated list of 8-12 relevant keywords, including hotel name, location, features, and attractions)
+  - OG Title: (Similar to title but optimized for social media, can be slightly longer)
+  - OG Description: (Engaging description for social media sharing, can be slightly longer than meta description)
   
-  Make sure the title, description, and keywords are engaging and optimized for search engines.
+  Make sure all content is engaging, unique, and optimized for both search engines and social media sharing.
+  Focus on local SEO keywords and unique selling points of the hotel.
   `,
 });
 
