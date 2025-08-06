@@ -9,7 +9,7 @@ const HeroSection: React.FC = () => {
 
   return (
     <div
-      className="relative w-full h-screen min-h-[600px] bg-cover bg-center bg-fixed mt-16"
+      className="relative w-full h-screen min-h-[600px] bg-cover bg-center bg-fixed"
       style={{
         backgroundImage:
           "url('https://images.unsplash.com/photo-1586375300773-8384e3e4916f')", // Changed to a more scenic Cherrapunji image
