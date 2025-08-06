@@ -1,35 +1,14 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import Hotel from "@/models/Hotel";
+import { getHotels } from "@/lib/database";
 
-export async function GET(request: Request) {
-  await dbConnect();
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const landmarkOrAttraction = searchParams.get("landmarkOrAttraction");
-
-    const query = landmarkOrAttraction
-      ? {
-          $or: [
-            {
-              landmarks: { $regex: `^${landmarkOrAttraction}$`, $options: "i" },
-            },
-            {
-              nearbyAttractions: {
-                $regex: `^${landmarkOrAttraction}$`,
-                $options: "i",
-              },
-            },
-          ],
-        }
-      : {};
-
-    const hotels = await Hotel.find(query);
-    return NextResponse.json(hotels);
+    const hotels = await getHotels();
+    return NextResponse.json({ hotels });
   } catch (error) {
-    console.error("GET /api/hotels error:", error);
+    console.error("Error in hotels API:", error);
     return NextResponse.json(
-      { error: "Internal Server Error", details: (error as Error).message },
+      { error: "Failed to fetch hotels" },
       { status: 500 }
     );
   }
