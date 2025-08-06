@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   BedDouble,
@@ -13,7 +16,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { hotels, bookings } from "@/lib/data";
 import {
   Table,
   TableBody,
@@ -23,12 +25,112 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Hotel, Booking } from "@/types";
+import { toast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
+  const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch hotels and bookings in parallel
+        const [hotelsResponse, bookingsResponse] = await Promise.all([
+          fetch("/api/hotels"),
+          fetch("/api/bookings"),
+        ]);
+
+        if (hotelsResponse.ok) {
+          const hotelsData = await hotelsResponse.json();
+          setHotels(hotelsData.hotels || []);
+        } else {
+          console.error("Failed to fetch hotels");
+          toast({
+            title: "Error",
+            description: "Failed to fetch hotels data.",
+            variant: "destructive",
+          });
+        }
+
+        if (bookingsResponse.ok) {
+          const bookingsData = await bookingsResponse.json();
+          // Convert date strings back to Date objects
+          const bookingsWithDates = bookingsData.bookings.map(
+            (booking: any) => ({
+              ...booking,
+              checkIn: new Date(booking.checkIn),
+              checkOut: new Date(booking.checkOut),
+            })
+          );
+          setBookings(bookingsWithDates);
+        } else {
+          console.error("Failed to fetch bookings");
+          toast({
+            title: "Error",
+            description: "Failed to fetch bookings data.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard data.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const totalHotels = hotels.length;
   const totalBookings = bookings.length;
   const pendingBookings = bookings.filter((b) => b.status === "Pending").length;
-  const recentBookings = bookings.slice(0, 5);
+  const recentBookings = bookings
+    .sort(
+      (a, b) => new Date(b.checkIn).getTime() - new Date(a.checkIn).getTime()
+    )
+    .slice(0, 5);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
