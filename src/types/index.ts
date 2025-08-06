@@ -4,6 +4,15 @@ export type Room = {
   price: number;
 };
 
+export type MetaTags = {
+  title: string;
+  description: string;
+  keywords: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+};
+
 export type Hotel = {
   id: string;
   slug: string;
@@ -19,6 +28,7 @@ export type Hotel = {
   policies: string;
   rooms: Room[];
   addons: { name: string; price: number }[];
+  metaTags?: MetaTags;
 };
 
 export type Booking = {
