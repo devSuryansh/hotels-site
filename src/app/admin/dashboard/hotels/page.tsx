@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Trash2, Edit } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,45 +28,100 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Hotel } from "@/types";
 import { AddHotelForm } from "@/components/add-hotel-form";
+import { EditHotelForm } from "@/components/edit-hotel-form";
+import { toast } from "@/hooks/use-toast";
 
 export default function ManageHotelsPage() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [deletingHotel, setDeletingHotel] = useState<Hotel | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const fetchHotels = async () => {
-      try {
-        const response = await fetch("/api/hotels");
-        const data = await response.json();
-        setHotels(data.hotels);
-      } catch (error) {
-        console.error("Error fetching hotels:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchHotels();
   }, []);
 
   const handleHotelAdded = () => {
     // Refetch hotels after adding a new one
-    setLoading(true);
-    const fetchHotels = async () => {
-      try {
-        const response = await fetch("/api/hotels");
-        const data = await response.json();
-        setHotels(data.hotels);
-      } catch (error) {
-        console.error("Error fetching hotels:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchHotels();
+  };
+
+  const handleHotelUpdated = () => {
+    // Refetch hotels after updating one
+    fetchHotels();
+  };
+
+  const fetchHotels = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/hotels");
+      const data = await response.json();
+      setHotels(data.hotels);
+    } catch (error) {
+      console.error("Error fetching hotels:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch hotels. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditHotel = (hotel: Hotel) => {
+    setEditingHotel(hotel);
+    setShowEditForm(true);
+  };
+
+  const handleDeleteHotel = async () => {
+    if (!deletingHotel) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/hotels/${deletingHotel.id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Hotel deleted",
+          description: "The hotel has been successfully deleted.",
+        });
+        fetchHotels(); // Refresh the list
+      } else {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete hotel");
+      }
+    } catch (error) {
+      console.error("Error deleting hotel:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to delete hotel. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeletingHotel(null);
+    }
   };
 
   if (loading) {
@@ -153,8 +208,20 @@ export default function ManageHotelsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleEditHotel(hotel)}
+                          className="cursor-pointer"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setDeletingHotel(hotel)}
+                          className="cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -170,6 +237,48 @@ export default function ManageHotelsPage() {
         onOpenChange={setShowAddForm}
         onHotelAdded={handleHotelAdded}
       />
+
+      <EditHotelForm
+        hotel={editingHotel}
+        open={showEditForm}
+        onOpenChange={(open) => {
+          setShowEditForm(open);
+          if (!open) {
+            setEditingHotel(null);
+          }
+        }}
+        onHotelUpdated={handleHotelUpdated}
+      />
+
+      <AlertDialog
+        open={!!deletingHotel}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeletingHotel(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              hotel "{deletingHotel?.name}" and remove all associated data from
+              our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteHotel}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
