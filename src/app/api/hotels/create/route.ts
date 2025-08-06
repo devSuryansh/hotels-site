@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
       policies,
       rooms,
       addons,
+      metaTags,
     } = body;
 
     // Validate required fields
@@ -41,18 +42,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate meta tags using AI
-    let metaTags = null;
-    try {
-      metaTags = await generateDynamicMetaTags({
-        hotelName: name,
-        hotelDescription: description,
-        hotelLocation: location,
-        hotelFeatures: features || [],
-        nearbyAttractions: nearbyAttractions || [],
-      });
-    } catch (error) {
-      console.error("Failed to generate meta tags:", error);
+    // Generate meta tags using AI if not provided
+    let finalMetaTags = metaTags;
+    if (!finalMetaTags) {
+      try {
+        finalMetaTags = await generateDynamicMetaTags({
+          hotelName: name,
+          hotelDescription: description,
+          hotelLocation: location,
+          hotelFeatures: features || [],
+          nearbyAttractions: nearbyAttractions || [],
+        });
+      } catch (error) {
+        console.error("Failed to generate meta tags:", error);
+        // Continue without meta tags if generation fails
+        finalMetaTags = null;
+      }
     }
 
     // Create hotel document
@@ -70,7 +75,7 @@ export async function POST(request: NextRequest) {
       policies: policies || "",
       rooms: rooms || [],
       addons: addons || [],
-      metaTags,
+      metaTags: finalMetaTags,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -80,7 +85,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       hotelId: result.insertedId.toString(),
-      metaTags,
+      metaTags: finalMetaTags,
       message: "Hotel created successfully",
     });
   } catch (error) {
