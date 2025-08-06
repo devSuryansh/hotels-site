@@ -25,7 +25,7 @@ export default function HotelsPage() {
   const [allHotels, setAllHotels] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [priceRange, setPriceRange] = useState([500, 20000]);
+  const [priceRange, setPriceRange] = useState([0, 50000]); // More inclusive range
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [selectedAttractions, setSelectedAttractions] = useState<string[]>([]);
   const [selectedLandmarks, setSelectedLandmarks] = useState<string[]>([]);
@@ -34,10 +34,15 @@ export default function HotelsPage() {
     const fetchHotels = async () => {
       try {
         const response = await fetch("/api/hotels");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-        setAllHotels(data.hotels);
+        console.log("Fetched hotels data:", data); // Debug log
+        setAllHotels(data.hotels || []); // Ensure we have an array
       } catch (error) {
         console.error("Error fetching hotels:", error);
+        setAllHotels([]); // Set empty array on error
       } finally {
         setLoading(false);
       }
@@ -45,6 +50,24 @@ export default function HotelsPage() {
 
     fetchHotels();
   }, []);
+
+  // Update price range based on actual hotel data
+  useEffect(() => {
+    if (allHotels.length > 0) {
+      const prices = allHotels
+        .filter((hotel) => hotel.priceRange && hotel.priceRange.length >= 2)
+        .flatMap((hotel) => hotel.priceRange);
+
+      if (prices.length > 0) {
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        // Only update if current range doesn't encompass the data
+        if (priceRange[0] > minPrice || priceRange[1] < maxPrice) {
+          setPriceRange([0, Math.max(maxPrice, 50000)]);
+        }
+      }
+    }
+  }, [allHotels, priceRange]);
 
   const handleFeatureChange = (feature: string) => {
     setSelectedFeatures((prev) =>
@@ -71,22 +94,46 @@ export default function HotelsPage() {
   };
 
   const filteredHotels = useMemo(() => {
+    if (!allHotels || allHotels.length === 0) {
+      return [];
+    }
+
     return allHotels.filter((hotel) => {
+      // Check if hotel has required properties
+      if (!hotel || !hotel.name || !hotel.description) {
+        return false;
+      }
+
       const matchesSearch =
         hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         hotel.description.toLowerCase().includes(searchTerm.toLowerCase());
+
       const matchesPrice =
-        hotel.priceRange[1] >= priceRange[0] &&
-        hotel.priceRange[0] <= priceRange[1];
-      const matchesFeatures = selectedFeatures.every((feature) =>
-        hotel.features.includes(feature)
-      );
-      const matchesAttractions = selectedAttractions.every((attraction) =>
-        hotel.nearbyAttractions.includes(attraction)
-      );
-      const matchesLandmarks = selectedLandmarks.every((landmark) =>
-        hotel.landmarks.includes(landmark)
-      );
+        !hotel.priceRange ||
+        hotel.priceRange.length < 2 ||
+        (hotel.priceRange[1] >= priceRange[0] &&
+          hotel.priceRange[0] <= priceRange[1]);
+
+      const matchesFeatures =
+        selectedFeatures.length === 0 ||
+        (hotel.features &&
+          selectedFeatures.every((feature) =>
+            hotel.features.includes(feature)
+          ));
+
+      const matchesAttractions =
+        selectedAttractions.length === 0 ||
+        (hotel.nearbyAttractions &&
+          selectedAttractions.every((attraction) =>
+            hotel.nearbyAttractions.includes(attraction)
+          ));
+
+      const matchesLandmarks =
+        selectedLandmarks.length === 0 ||
+        (hotel.landmarks &&
+          selectedLandmarks.every((landmark) =>
+            hotel.landmarks.includes(landmark)
+          ));
 
       return (
         matchesSearch &&
@@ -97,6 +144,7 @@ export default function HotelsPage() {
       );
     });
   }, [
+    allHotels,
     searchTerm,
     priceRange,
     selectedFeatures,
@@ -106,7 +154,7 @@ export default function HotelsPage() {
 
   const resetFilters = () => {
     setSearchTerm("");
-    setPriceRange([500, 20000]);
+    setPriceRange([0, 50000]);
     setSelectedFeatures([]);
     setSelectedAttractions([]);
     setSelectedLandmarks([]);
@@ -156,8 +204,8 @@ export default function HotelsPage() {
                 <Label className="font-semibold">Price Range</Label>
                 <div className="mt-4">
                   <Slider
-                    min={1}
-                    max={20000}
+                    min={0}
+                    max={50000}
                     step={500}
                     value={priceRange}
                     onValueChange={(value) => setPriceRange(value)}
@@ -251,6 +299,15 @@ export default function HotelsPage() {
                 Please wait while we fetch the latest hotel information.
               </p>
             </div>
+          ) : allHotels.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center bg-card rounded-lg p-8">
+              <h3 className="font-headline text-2xl font-semibold">
+                No Hotels Available
+              </h3>
+              <p className="mt-2 text-muted-foreground">
+                No hotels found in the database. Please add some hotels first.
+              </p>
+            </div>
           ) : filteredHotels.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredHotels.map((hotel) => (
@@ -260,12 +317,21 @@ export default function HotelsPage() {
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center bg-card rounded-lg p-8">
               <h3 className="font-headline text-2xl font-semibold">
-                No Hotels Found
+                No Hotels Match Your Filters
               </h3>
               <p className="mt-2 text-muted-foreground">
                 Try adjusting or{" "}
-                <span className="text-foreground">resetting</span> your filters
-                to find more results.
+                <Button
+                  variant="link"
+                  className="p-0 h-auto"
+                  onClick={resetFilters}
+                >
+                  resetting
+                </Button>{" "}
+                your filters to find more results.
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Total hotels available: {allHotels.length}
               </p>
             </div>
           )}
