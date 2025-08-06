@@ -1,28 +1,40 @@
-import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 import Link from "next/link";
+import { CloudRainWind, Phone, Mail } from "lucide-react";
 
-const Footer = () => {
+export function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div>
-            <h3 className="text-xl font-bold text-white mb-4">Amit Hotels</h3>
-            <p className="text-sm">
-              Discover the Cherrapunji&apos;s best hotels and resorts. Book your
-              perfect stay with us.
+    <footer className="border-t bg-background">
+      <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="col-span-2 md:col-span-1">
+            <Link
+              href="/"
+              className="flex items-center gap-2 font-headline text-xl font-bold"
+            >
+              <CloudRainWind className="h-7 w-7 text-[#3266cd]" />
+              Resorts in Cherrapunji
+            </Link>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Discover the best resorts and hotels in the heart of Meghalaya.
             </p>
           </div>
-
           <div>
-            <h4 className="text-lg font-semibold text-white mb-4">
+            <h3 className="font-semibold tracking-wider text-foreground">
               Quick Links
-            </h4>
-            <ul className="space-y-2">
+            </h3>
+            <ul className="mt-4 space-y-2">
               <li>
                 <Link
-                  href="/about-us"
-                  className="hover:text-white transition-colors"
+                  href="/hotels"
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Hotels
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/about"
+                  className="text-sm text-muted-foreground hover:text-foreground"
                 >
                   About Us
                 </Link>
@@ -30,88 +42,69 @@ const Footer = () => {
               <li>
                 <Link
                   href="/contact"
-                  className="hover:text-white transition-colors"
+                  className="text-sm text-muted-foreground hover:text-foreground"
                 >
                   Contact
                 </Link>
               </li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold tracking-wider text-foreground">
+              Legal
+            </h3>
+            <ul className="mt-4 space-y-2">
               <li>
                 <Link
-                  href="/faqs"
-                  className="hover:text-white transition-colors"
-                >
-                  FAQs
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy-policy"
-                  className="hover:text-white transition-colors"
+                  href="/privacy"
+                  className="text-sm text-muted-foreground hover:text-foreground"
                 >
                   Privacy Policy
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Terms of Service
+                </Link>
+              </li>
             </ul>
           </div>
-
           <div>
-            <h4 className="text-lg font-semibold text-white mb-4">
-              Nearby Landmarks
-            </h4>
-            <ul className="space-y-2">
-              {[
-                "Mawblang",
-                "Sohra",
-                "East Khasi Hills",
-                "Saitsohpen",
-                "Mawlynnong",
-                "Mawphlang",
-                "Pynshad Khurai",
-                "Latikynsew",
-                "Mawsmai",
-                "Mawpunkirtiang",
-                "Khliehshnong",
-                "Mawkdok Village",
-              ].map((attraction, index) => (
-                <li key={index}>
-                  <Link
-                    href={`/${attraction.toLowerCase().replace(/\s+/g, "-")}`}
-                    className="hover:text-white transition-colors"
-                  >
-                    {attraction}
-                  </Link>
-                </li>
-              ))}
+            <h3 className="font-semibold tracking-wider text-foreground">
+              Contact Us
+            </h3>
+            <ul className="mt-4 space-y-2">
+              <li>
+                <a
+                  href="tel:+919992052201"
+                  className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2"
+                >
+                  <Phone className="h-4 w-4" />
+                  +91 999 205 2201
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:bookingreservations@resortsincherrapunji.com"
+                  className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2"
+                >
+                  <Mail className="h-4 w-4" />
+                  bookingreservations@resortsincherrapunji.com
+                </a>
+              </li>
             </ul>
-          </div>
-
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Follow Us</h4>
-            <div className="flex space-x-4">
-              <Link href="#" className="hover:text-white transition-colors">
-                <Facebook className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="hover:text-white transition-colors">
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="hover:text-white transition-colors">
-                <Instagram className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="hover:text-white transition-colors">
-                <Youtube className="h-5 w-5" />
-              </Link>
-            </div>
           </div>
         </div>
-
-        <div className="border-t border-gray-800 mt-12 pt-8 text-sm text-center">
-          <p>
-            &copy; {new Date().getFullYear()} Amit Hotels. All rights reserved.
+        <div className="mt-8 border-t border-border pt-8 flex flex-col sm:flex-row items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} Cherrapunji Escapes. All rights
+            reserved.
           </p>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}
