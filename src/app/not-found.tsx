@@ -19,7 +19,7 @@ const NotFoundPage = () => {
       <Card className="max-w-3xl w-full shadow-lg">
         <CardHeader className="text-center border-b pb-6">
           <CardTitle className="text-3xl md:text-4xl font-bold">
-            Hotel Not Found
+            Page Not Found
           </CardTitle>
           <CardDescription className="text-lg mt-2">
             We couldn&apos;t locate the page you were looking for
@@ -58,12 +58,6 @@ const NotFoundPage = () => {
             <Link href="/" className="flex items-center gap-2">
               <ArrowLeft size={16} />
               <span>Back to Home</span>
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href="/search" className="flex items-center gap-2">
-              <Search size={16} />
-              <span>Search Our Site</span>
             </Link>
           </Button>
           <Button variant="secondary" asChild>

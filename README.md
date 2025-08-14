@@ -1,3 +1,5 @@
-# Hotels Site
+# Firebase Studio
 
-This is a simple hotels site built with Next.js, Tailwind CSS, and Shadcn UI.
+This is a NextJS starter in Firebase Studio.
+
+To get started, take a look at src/app/page.tsx.

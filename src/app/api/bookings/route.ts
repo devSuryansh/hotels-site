@@ -1,40 +1,15 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import Booking from "@/models/Booking";
+import { getBookings } from "@/lib/database";
 
-export async function POST(request: Request) {
-  await dbConnect();
-
+export async function GET() {
   try {
-    const data = await request.json();
-    // Validate required fields
-    const requiredFields = [
-      "hotelId",
-      "hotelName",
-      "checkIn",
-      "checkOut",
-      "guests",
-      "phone",
-      "roomType",
-      "totalPrice",
-      "nights",
-    ];
-    const missingFields = requiredFields.filter((field) => !data[field]);
-    if (missingFields.length > 0) {
-      console.log("Missing fields:", missingFields);
-      return NextResponse.json(
-        { error: `Missing required fields: ${missingFields.join(", ")}` },
-        { status: 400 }
-      );
-    }
-
-    const booking = await Booking.create(data);
-    return NextResponse.json(booking, { status: 201 });
+    const bookings = await getBookings();
+    return NextResponse.json({ bookings });
   } catch (error) {
-    console.error("POST /api/bookings error:", error);
+    console.error("Error in bookings API:", error);
     return NextResponse.json(
-      { error: "Failed to create booking", details: (error as Error).message },
-      { status: 400 }
+      { error: "Failed to fetch bookings" },
+      { status: 500 }
     );
   }
 }

@@ -1,20 +1,9 @@
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import RootLayout from "@/components/RootLayout";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import Script from "next/script";
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  preload: true,
-  variable: "--font-inter",
-});
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://resortsincherrapunji.com"), // Replace with your actual domain
+  metadataBase: new URL("https://resortsincherrapunji.com"),
   title: {
     default: "Best Resorts & Hotels in Cherrapunji | Luxury Stays in Meghalaya",
     template: "%s | Cherrapunji Hotels & Resorts",
@@ -42,7 +31,7 @@ export const metadata: Metadata = {
     siteName: "Cherrapunji Hotels & Resorts",
     images: [
       {
-        url: "/og-image.jpg", // Add your OG image
+        url: "/og-image.png", // Add your OG image
         width: 1200,
         height: 630,
         alt: "Luxury Resorts in Cherrapunji",
@@ -56,7 +45,6 @@ export const metadata: Metadata = {
     title: "Best Resorts & Hotels in Cherrapunji | Luxury Stays in Meghalaya",
     description:
       "Book luxury resorts and hotels in Cherrapunji, Meghalaya. Experience breathtaking views, living root bridges, and waterfalls.",
-    images: ["/twitter-image.jpg"], // Add your Twitter card image
   },
   robots: {
     index: true,
@@ -69,125 +57,40 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-  },
   verification: {
     google: "your-google-verification-code", // Add your Google verification code
-    yandex: "your-yandex-verification-code", // Add your Yandex verification code if needed
   },
   category: "travel",
 };
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable}`}
-      itemScope
-      itemType="http://schema.org/WebSite"
-    >
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/apple-touch-icon.png"
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
         />
         <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/favicon-32x32.png"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap"
+          rel="stylesheet"
         />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/favicon-16x16.png"
-        />
-        <link rel="manifest" href="/site.webmanifest" />
-        <meta name="theme-color" content="#065f46" />
       </head>
-      <body className={inter.className}>
-        <RootLayout>
-          <SpeedInsights />
-          <Analytics />
-          {children}
-        </RootLayout>
-
-        {/* Structured Data for Organization */}
-        <Script
-          id="org-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "Cherrapunji Hotels & Resorts",
-              url: "https://cherrapunji-hotels.com",
-              logo: "https://cherrapunji-hotels.com/logo.png",
-              contactPoint: {
-                "@type": "ContactPoint",
-                telephone: "+91-123-456-7890", // Replace with actual phone
-                contactType: "customer service",
-                areaServed: "IN",
-                availableLanguage: ["en", "hi"],
-              },
-              sameAs: [
-                "https://facebook.com/your-page", // Add your social links
-                "https://instagram.com/your-page",
-                "https://twitter.com/your-page",
-              ],
-            }),
-          }}
-        />
-
-        {/* Structured Data for Local Business */}
-        <Script
-          id="local-business-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "TravelAgency",
-              name: "Cherrapunji Hotels & Resorts",
-              image: "https://cherrapunji-hotels.com/hero-image.jpg",
-              "@id": "https://cherrapunji-hotels.com",
-              url: "https://cherrapunji-hotels.com",
-              telephone: "+91-123-456-7890", // Replace with actual phone
-              address: {
-                "@type": "PostalAddress",
-                streetAddress: "Your Street Address",
-                addressLocality: "Cherrapunji",
-                addressRegion: "Meghalaya",
-                postalCode: "793108",
-                addressCountry: "IN",
-              },
-              geo: {
-                "@type": "GeoCoordinates",
-                latitude: 25.2867,
-                longitude: 91.7086,
-              },
-              openingHoursSpecification: {
-                "@type": "OpeningHoursSpecification",
-                dayOfWeek: [
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                  "Saturday",
-                  "Sunday",
-                ],
-                opens: "00:00",
-                closes: "23:59",
-              },
-              priceRange: "₹₹₹",
-            }),
-          }}
-        />
+      <body className="font-body antialiased">
+        {children}
+        <Toaster />
       </body>
     </html>
   );

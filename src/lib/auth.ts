@@ -1,61 +1,63 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/lib/auth.ts
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcrypt";
-import dbConnect from "@/lib/mongodb";
-import User from "@/models/User";
+// Utility function to get auth headers for API calls
+export function getAuthHeaders(): HeadersInit {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
 
-export const authOptions = {
-  providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        await dbConnect();
-        const user = await User.findOne({ email: credentials?.email });
+  if (token) {
+    return {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+  }
 
-        if (!user || !user.verified || user.role === "pending") {
-          throw new Error("Invalid credentials or account not verified");
-        }
+  return {
+    "Content-Type": "application/json",
+  };
+}
 
-        const isValid = await bcrypt.compare(
-          credentials?.password || "",
-          user.password
-        );
-        if (!isValid) {
-          throw new Error("Invalid credentials");
-        }
+// Utility function to make authenticated API calls
+export async function authenticatedFetch(
+  url: string,
+  options: RequestInit = {}
+) {
+  const headers = {
+    ...getAuthHeaders(),
+    ...options.headers,
+  };
 
-        return {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        };
-      },
-    }),
-  ],
-  pages: {
-    signIn: "/admin/login",
-  },
-  callbacks: {
-    async jwt({ token, user }: { token: any; user: any }) {
-      if (user) {
-        token.role = user.role;
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }: { session: any; token: any }) {
-      session.user.role = token.role as string;
-      session.user.id = token.id as string;
-      return session;
-    },
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-};
+  return fetch(url, {
+    ...options,
+    headers,
+  });
+}
+
+// Check if user is authenticated
+export function isAuthenticated(): boolean {
+  if (typeof window === "undefined") return false;
+  return !!localStorage.getItem("admin_token");
+}
+
+// Get user info from token (without verifying - for client-side display only)
+export function getUserFromToken(): {
+  username: string;
+  email: string;
+  role: string;
+} | null {
+  if (typeof window === "undefined") return null;
+
+  const token = localStorage.getItem("admin_token");
+  if (!token) return null;
+
+  try {
+    // Note: This is NOT secure validation, just for display purposes
+    // Real validation happens on the server
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return {
+      username: payload.username,
+      email: payload.email,
+      role: payload.role,
+    };
+  } catch {
+    return null;
+  }
+}
