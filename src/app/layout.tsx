@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://resortsincherrapunji.com"),
@@ -89,6 +91,8 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
+        <Analytics />
+        <SpeedInsights />
         {children}
         <Toaster />
       </body>
